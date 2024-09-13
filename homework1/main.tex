@@ -41,7 +41,7 @@
 
 \section*{II. \emph{reltative error} in bisection method}
 当迭代到第n步之后，区间长度$h_{n+1} = \dfrac{b_0 - a_0}{2^n}$,
-\[相对误差E_{rel} = \dfrac{|r - c_n|}{|r|} \leq \dfrac{\dfrac{a_0 - b_0}{2^{n+1}}}{a_0} =  \dfrac{a_0 - b_0}{2^{n+1} a}
+\[相对误差E_{rel} = \dfrac{|r - c_n|}{|r|} \leq \dfrac{\dfrac{a_0 - b_0}{2^{n+1}}}{a_0} =  \dfrac{a_0 - b_0}{2^{n+1} a_0}
 \]
 \hspace*{2em}当$
 n \geq \dfrac{\log(b_0 - a_0) - \log \epsilon - \log a_0}{\log 2} - 1.
@@ -118,12 +118,15 @@ x_{n+2} = \frac{1}{p + \dfrac{1}{p + x_n}}= \frac{p + x_n}{p^2 + px_n + 1}
 
 \section*{VIII. Newton's method at a root of multipicity k}
 \subsection*{VIII-a}
+若零点 $\alpha$ 是多重根，则点列$\{x_n\}$将线性收敛到根 $\alpha$,而不是二阶收敛，
+我们可以通过计算$\dfrac{|x_{n+1} - \alpha|}{|x_n - \alpha|}$来判断,若其趋近于0，则为二阶收敛；反之为一阶收敛，$\alpha$为多重根
+
 \subsection*{VIII-b}
 设$f(x) = (x - \alpha)^k g(x)$\\
 其中\[g(x)=
 \begin{cases}
   \frac{f(x)}{(x-\alpha)^k} &\text{if } x \neq \alpha\\
-  \frac{f^{(k)}(\alpha)}{n!}&\text{if } x = \alpha
+  \frac{f^{(k)}(\alpha)}{k!}&\text{if } x = \alpha
 \end{cases}
 \] 
 
@@ -134,10 +137,26 @@ f'(x) = k(x-\alpha)^{k-1}g(x) + (x-\alpha)^kg'(x)
   x_{n+1} &= x_n -k\frac{f(x)}{f'(x)}\\
   \implies x_{n+1} - \alpha&= x_n - \alpha -k\frac{(x - \alpha)^k g(x)}{k(x-\alpha)^{k-1}g(x) + (x-\alpha)^kg'(x)}\\
   \implies \frac{x_{n+1} - \alpha}{x_n - \alpha} &= 1 - \frac{kg(x)}{kg(x)+ (x-a)g'(x)}\\
-  \implies \frac{x_{n+1} - \alpha}{(x_n - \alpha)^2} &= \frac{g'(x)}{kg(x)+ (x-a)g'(x)}
+  \implies \frac{x_{n+1} - \alpha}{(x_n - \alpha)^2} &= \frac{g'(x)}{kg(x)+ (x-a)g'(x)}\\
+  \implies \left|\frac{x_{n+1} - \alpha}{(x_n - \alpha)^2} \right| &\leq \frac{g'(x)}{kg(x)}
 \end{align*}
-
-
+由于$g(x)$连续，故$\lim\limits_{x \to \alpha} g(x) = g(\alpha)$,故存在$\delta_1 > 0$使得当$|x - \alpha| < \delta$时，有$|g(x) - g(\alpha)| < \dfrac{g(\alpha)}{2}$\\
+因为$f(x) \in C^{k+1},f(x)$在$\alpha$处的展开式为
+\[
+f(x) = \frac{f^{(k)}(\alpha)}{k!}(x-\alpha)^k + \frac{f^{(k+1)}(\xi)}{(k+1)!}(x-\alpha)^{k+1}
+\]
+其中$\xi$在$x$和$\alpha$之间
+\begin{align*}
+    g'(\alpha) &= \lim\limits_{x \to \alpha} \frac{g(x) - g(\alpha)}{x - \alpha}\\
+    &= \lim\limits_{x \to \alpha} \dfrac{\frac{f(x)}{(x-\alpha)^k}-\frac{f^{(k)}(\alpha)}{k!}}{x - \alpha}\\
+    &= f^{(k+1)}(\xi)
+  \end{align*}
+从而g'(x)在$\alpha$处连续，故存在$\delta_2 > 0$使得当$|x - \alpha| < \delta$时，有$|g'(x) - g'(\alpha)| < \dfrac{g'(\alpha)}{2}$\\
+，故有
+\[
+\left|\frac{x_{n+1} - \alpha}{(x_n - \alpha)^2} \right| \leq \frac{3g'(\alpha)}{kg(\alpha)}
+\]
+从而$\{x_n\}$二阶收敛
 % ===============================================
 
 
