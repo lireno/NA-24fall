@@ -1,7 +1,5 @@
-# Makefile for LaTeX compilation using xelatex -> bibtex -> xelatex * 2
-
 # Variables
-TEXFILE = main
+TEXFILE = answer
 TEX = pdflatex
 BIB = bibtex
 
@@ -10,11 +8,11 @@ all: pdf
 pdf: $(TEXFILE).pdf
 
 $(TEXFILE).pdf: $(TEXFILE).tex
-	# First xelatex pass
+	# First pdflatex pass
 	$(TEX) $(TEXFILE).tex
 	# Run bibtex
 	$(BIB) $(TEXFILE)
-	# Second and third xelatex pass
+	# Second and third pdflatex pass
 	$(TEX) $(TEXFILE).tex
 	$(TEX) $(TEXFILE).tex
 
