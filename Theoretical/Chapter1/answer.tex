@@ -155,10 +155,10 @@ where $\xi_x$ lies between $x$ and $\alpha$.
 \begin{align*}
     g'(\alpha) &= \lim\limits_{x \to \alpha} \frac{g(x) - g(\alpha)}{x - \alpha}\\
     &= \lim\limits_{x \to \alpha} \dfrac{\frac{f(x)}{(x - \alpha)^k} - \frac{f^{(k)}(\alpha)}{k!}}{x - \alpha}\\
-    &= \lim\limits_{x \to \alpha} f^{(k+1)}(\xi_x).
+    &= \lim\limits_{x \to \alpha} f^{(k+1)}(\xi_x).\\
     &= f^{(k+1)}(\alpha).
 \end{align*}
-Since $g'(x)$ is continuous at $\alpha$, there exists $\delta_2 > 0$ such that when $|x - \alpha| < \delta_2$, $|g'(x) - g'(\alpha)| < \dfrac{g'(\alpha)}{2}$.\\
+Thus, \( g'(x) \) is bounded at \( \alpha \). Moreover, due to the intermediate value property of derivatives and the continuity of \( g'(x) \) in a neighborhood of \( \alpha \), it follows that \( g'(x) \) is continuous at \( \alpha \). So, there exists $\delta_2 > 0$ such that when $|x - \alpha| < \delta_2$, $|g'(x) - g'(\alpha)| < \dfrac{g'(\alpha)}{2}$.\\
 Thus, we have
 \[
 \left|\frac{x_{n+1} - \alpha}{(x_n - \alpha)^2}\right| \leq \frac{3g'(\alpha)}{kg(\alpha)},
