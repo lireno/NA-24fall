@@ -44,4 +44,4 @@ report: $(TEXFILE).tex
 
 # 清理所有生成的可执行文件和其他中间文件
 clean:
-	rm -f $(TARGETS) *.o *.aux *.bbl *.blg *.log *.out *.toc *.pdf *.run.xml *-blx.bib *.synctex.gz
+	rm -f $(TARGETS) *.out *.o *.aux *.bbl *.blg *.log *.out *.toc *.pdf *.run.xml *-blx.bib *.synctex.gz
