@@ -27,10 +27,15 @@ class F3 : public Function {
 };
 
 void solve1() {
-    std::cout << "Finding the root of \\sin(x/2) - 1" << std::endl;
+    std::cout << "Finding the root of \\sin(x/2) - 1 with initial values of 0 and Pi/2" << std::endl;
     Secant_Method solver(F1(), 0, Pi / 2);
     double x = solver.solve();
     std::cout << "A root is: " << x << std::endl;
+
+    std::cout << "Finding the root of \\sin(x/2) - 1 with initial values of Pi and 3*Pi/2" << std::endl;
+    Secant_Method solver2(F1(), Pi, 3 * Pi / 2);
+    double x2 = solver2.solve();
+    std::cout << "A root is: " << x2 << std::endl;
 }
 
 void solve2() {

@@ -6,12 +6,12 @@
 
 const double Pi = acos(-1.);
 
-class F1 : public Function {
+class Volume : public Function {
   private:
     double L, V, r;
 
   public:
-    F1(double L, double V, double r) : L(L), V(V), r(r) {}
+    Volume(double L, double V, double r) : L(L), V(V), r(r) {}
     double operator()(double h) const {
         return (0.5 * Pi * pow(r, 2) - pow(r, 2) * asin(h / r) - h * sqrt(pow(r, 2) - pow(h, 2))) * L - V;
         ;
@@ -20,7 +20,7 @@ class F1 : public Function {
 
 void solve() {
     double L = 10.0, r = 1.0, V = 12.4;
-    F1 f(L, V, r);
+    Volume f(L, V, r);
     std::cout << "Finding the height with Bisection Method" << std::endl;
     Bisection_Method solver1(f, 0, 1);
     double h1 = solver1.solve();

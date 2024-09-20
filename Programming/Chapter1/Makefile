@@ -24,6 +24,7 @@ run: $(PROBLEM_TARGETS)
 	@for prog in $(PROBLEM_TARGETS); do \
 		echo "Running $$prog..."; \
 		./$$prog; \
+		echo ""; \
 	done
 
 # 编译 LaTeX 报告生成 PDF
