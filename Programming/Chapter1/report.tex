@@ -59,7 +59,7 @@ The bisection method is implemented in \texttt{Bisection\_Method} and relies on 
 However, two special cases need to be handled:
 \begin{enumerate}
     \item \textbf{Discontinuity in the function on the interval}: If the function is not continuous, the algorithm may fail to converge. To handle this, we check for discontinuities at midpoint of the interval and report an error if found.
-    \item \textbf{Identical function values at the interval endpoints}: If \( sgn(f(a)) = sgn(f(b)) \), where \( [a, b] \) is the initial interval, the standard bisection method won't work as it requires a sign change. In this case, we abort the algorithm and report an error.
+    \item \textbf{Identical signs at the interval endpoints}: If \( sgn(f(a)) = sgn(f(b)) \), where \( [a, b] \) is the initial interval, the standard bisection method won't work as it requires a sign change. In this case, we abort the algorithm and report an error.
 \end{enumerate}
 
 \subsection*{4. Newton's Method Formula}
@@ -286,6 +286,6 @@ The secant method is quite sensitive to initial values. When we choose appropria
 
 % ===============================================
 \section*{ \center{\normalsize {Acknowledgement}} }
-Through the assistance of ChatGPT-4, I have gained a better understanding of how to write LaTeX documents, and I have also learned the proper spelling of several technical terms in English. I would like to thank this AI tool for helping me enhance my skills in LaTeX and numerical analysis documentation.
+Through the assistance of ChatGPT-4, I have gained a better understanding of how to write LaTeX documents, and I have also learned the proper spelling of several technical terms in English. I would like to thank ChatGPT-4 for helping me enhance my skills in LaTeX and numerical analysis documentation. Additionally, I would like to express my gratitude to ChatGPT for its assistance in generating the `README.md` file and the `Makefile`, which were essential in organizing and automating my project.
 
 \end{document}

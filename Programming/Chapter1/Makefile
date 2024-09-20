@@ -9,7 +9,7 @@ PROBLEM_TARGETS = $(PROBLEM_SRCS:.cpp=)
 
 # 报告的源文件（假设你用 LaTeX 写报告）
 TEXFILE = report
-TEX = xelatex
+TEX = pdflatex
 BIB = bibtex
 
 # 默认规则，生成所有的目标可执行文件
@@ -19,6 +19,10 @@ all: $(PROBLEM_TARGETS)
 %: %.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $<
 
+ProblemB: ProblemB.cpp
+	$(CXX) $(CXXFLAGS) -o ProblemB ProblemB.cpp
+	./ProblemB
+
 # 编译并运行所有 Problem 的目标
 run: $(PROBLEM_TARGETS)
 	@for prog in $(PROBLEM_TARGETS); do \
@@ -26,6 +30,7 @@ run: $(PROBLEM_TARGETS)
 		./$$prog; \
 		echo ""; \
 	done
+
 
 # 编译 LaTeX 报告生成 PDF
 
