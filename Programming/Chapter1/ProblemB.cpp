@@ -22,7 +22,7 @@ class F2 : public Function {
 class F3 : public Function {
   public:
     double operator()(double x) const {
-        return pow(2.0, -x) - exp(x) + 2 * cos(x) - 6;
+        return pow(2.0, -x) + exp(x) + 2 * cos(x) - 6;
     }
 };
 
@@ -64,7 +64,7 @@ void solve_f4() {
 int main() {
     solve_f1();
     solve_f2();
-    // solve_f3();
+    solve_f3();
     // solve_f4();
     return 0;
 }

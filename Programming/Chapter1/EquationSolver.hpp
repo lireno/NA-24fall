@@ -27,6 +27,7 @@ class Bisection_Method : public EquationSolver {
     virtual double solve() {
         double fa = F(a), fb = F(b);
 
+        // Check if the function changes sign over the interval
         if (fa * fb > 0) {
             throw std::invalid_argument("The function must change sign over the interval.");
         }
@@ -35,17 +36,17 @@ class Bisection_Method : public EquationSolver {
             double c = (a + b) / 2;
             double fc = F(c);
 
-            // 检查不连续性
+            // Check if the function is continuous in the interval
             if (F.is_Continuous(c) == false) {
                 throw std::runtime_error("The function appears to be discontinuous in the interval.");
             }
 
-            // 检查是否找到根或是否达到精度要求
+            // Check if the precision is met
             if (fabs(fc) < delta || (b - a) / 2 < eps) {
-                return c; // 找到根
+                return c;
             }
 
-            // 调整区间
+            // adjust the interval
             if (fa * fc < 0) {
                 b = c;
                 fb = fc;
@@ -55,7 +56,7 @@ class Bisection_Method : public EquationSolver {
             }
         }
 
-        return (a + b) / 2; // 最大迭代次数达到时返回中点
+        return (a + b) / 2; // return the best guess after max iterations
     }
 };
 
@@ -78,7 +79,7 @@ class Newton_Method : public EquationSolver {
             double dfx = F.derivative(x);
 
             if (fabs(fx) < eps) {
-                return x; // root found
+                return x;
             }
 
             if (fabs(dfx) < 1e-12) { // avoid division by zero
@@ -100,7 +101,7 @@ class Secant_Method : public EquationSolver {
 
   public:
     Secant_Method(const Function& F, double x0, double x1,
-                  double eps = 1e-7, int Maxiter = 30) : EquationSolver(F), x0(x0), x1(x1), Maxiter(Maxiter), eps(eps) {}
+                  double eps = 1e-7, int Maxiter = 50) : EquationSolver(F), x0(x0), x1(x1), Maxiter(Maxiter), eps(eps) {}
 
     virtual double solve() {
         double x_prev = x0, x_curr = x1;
@@ -110,7 +111,7 @@ class Secant_Method : public EquationSolver {
             double f_curr = F(x_curr);
 
             if (fabs(f_curr) < eps) {
-                return x_curr; // root found
+                return x_curr;
             }
 
             if (fabs(f_curr - f_prev) < 1e-12) { // avoid division by zero

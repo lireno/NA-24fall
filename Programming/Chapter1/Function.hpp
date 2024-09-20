@@ -10,6 +10,7 @@ class Function {
         return ((*this)(x + h) - (*this)(x - h)) / (2 * h);
     }
 
+    // Check if the function is continuous at a given point
     bool is_Continuous(double x_0, double eps = 1e-2) const {
         double h = 1e-6;
         double leftLimit = (*this)(x_0 - h);

@@ -26,7 +26,7 @@ void solve_a() {
     double l = 89.0, h = 49.0, D = 55.0, beta1 = 11.5 * (M_PI / 180.0);
     std::cout << "Finding the Maximum with D = 55 in" << std::endl;
     NoseInFailure failure_eq(l, h, D, beta1);
-    Newton_Method solver(failure_eq, 33.0 * (M_PI / 180.0));
+    Newton_Method solver(failure_eq, 50.0 * (M_PI / 180.0));
     double alpha = solver.solve();
     std::cout << "Maximum angle alpha: " << alpha * (180.0 / M_PI) << " degrees." << std::endl;
 }
