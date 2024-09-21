@@ -19,10 +19,6 @@ all: $(PROBLEM_TARGETS)
 %: %.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $<
 
-ProblemB: ProblemB.cpp
-	$(CXX) $(CXXFLAGS) -o ProblemB ProblemB.cpp
-	./ProblemB
-
 # 编译并运行所有 Problem 的目标
 run: $(PROBLEM_TARGETS)
 	@for prog in $(PROBLEM_TARGETS); do \
@@ -31,6 +27,12 @@ run: $(PROBLEM_TARGETS)
 		echo ""; \
 	done
 
+# 单独编译并运行 ProblemB 的规则
+ProblemB: ProblemB.cpp
+	$(CXX) $(CXXFLAGS) -o ProblemB ProblemB.cpp
+
+run_ProblemB: ProblemB
+	./ProblemB
 
 # 编译 LaTeX 报告生成 PDF
 
@@ -39,14 +41,13 @@ all: pdf
 pdf: $(TEXFILE).pdf
 
 report: $(TEXFILE).tex
-	# First xelatex pass
+	# First pdflatex pass
 	$(TEX) $(TEXFILE).tex
 	# Run bibtex
 	$(BIB) $(TEXFILE)
-	# Second and third xelatex pass
+	# Second and third pdflatex pass
 	$(TEX) $(TEXFILE).tex
 	$(TEX) $(TEXFILE).tex
-
 
 # 清理所有生成的可执行文件和其他中间文件
 clean:

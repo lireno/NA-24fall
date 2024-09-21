@@ -1,4 +1,4 @@
-# Numerical Analysis Programming Homework
+# Numerical Analysis Programming Homework #1
 
 ## Overview
 This repository contains the implementation of numerical methods (Bisection, Newton's, and Secant methods) for solving various mathematical problems as part of the Numerical Analysis programming homework.
@@ -58,6 +58,7 @@ To observe the error caused by this code, navigate to line 68 in `ProblemB.cpp`,
 
 ```bash
 make ProblemB
+./ProblemB
 ```
 
 The program will attempt to solve a function that may have discontinuities or other issues, causing an error. The program should output an error message indicating the problem (e.g., function discontinuity).
