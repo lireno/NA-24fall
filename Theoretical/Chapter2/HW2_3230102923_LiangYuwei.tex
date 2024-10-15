@@ -1,0 +1,285 @@
+\documentclass[a4paper]{article}
+\usepackage[affil-it]{authblk}
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+\addbibresource{citation.bib}
+
+\begin{document}
+% =================================================
+\title{Numerical Analysis homework \# 2}
+
+\author{梁育玮 Liang Yuwei 3230102923
+  \thanks{Electronic address: \texttt{liangyuwei631@gmail.com}}}
+\affil{(Mathematics and Applied Mathematics 2302), Zhejiang University }
+
+
+\date{Due time: \today}
+
+\maketitle
+
+
+% ============================================
+\section*{I. linear interpolation}
+
+\subsection*{I-a}
+Since $x_0 = 1, x_1 = 2$,we have \[
+p_1(f;x) = \frac{x}{2} + \frac{3}{2} .
+\]
+And \(f''(x)= \frac{2}{x^3}\), so,
+\[
+\frac{1}{x} + \frac{x}{2} -\frac{3}{2} = \frac{(x-1)(x-2)}{\xi^3(x)}.
+\]
+Siplify the equation, we have \[
+\xi(x) = \sqrt[3]{2x},  x \in (1, 2).
+\]
+
+\subsection*{I-b}
+when $x \in [1, 2]$,
+\[
+\max \xi(x) = \sqrt[3]{4} , \min \xi(x)  = \sqrt[3]{2}.
+\]
+And \[\max f''(\xi(x)) = 1\]
+
+
+\section*{II. non-negative polynomials}
+
+let \[
+l_i(x) = \frac{\prod\limits_{j \neq i} (x - x_j)^2}{\prod\limits_{j \neq i} (x_i - x_j)^2} > 0.
+\]
+Then we have $$l_i(x_j) = \delta_{ij}.$$
+Let \[p(x) = \sum_{i = 0}^{n} f_i l_i.\]
+It is easy to see that $p(x_i) = f_i$ for $i = 0, 1, \cdots, n$ and $p(x)>0$.
+
+\section*{III. Consider $f(x) = e^x$}
+\subsection*{III-a}
+
+
+\texttt{Base Case:}
+For \(n = 0\), we have 
+
+\[
+f[t] = \frac{(e-1)^0}{0!}e^t = e^t.
+\]
+
+\texttt{Inductive Step:}
+
+Assume that for some \(k \geq 0\), 
+\[
+f[t,t+1,\dots,t+k] = \frac{(e-1)^k}{k!}e^t.
+\]
+We want to show that 
+\[
+f[t,t+1,\dots,t+k,t+k+1] = \frac{(e-1)^{k+1}}{(k+1)!}e^t.
+\]
+
+Using the inductive hypothesis, we get
+\[
+f[t+1,\dots,t+k,t+k+1] = \frac{(e-1)^k}{k!}e^{t+1}.
+\]
+
+Therefore,
+\[
+f[t,t+1,\dots,t+k,t+k+1] = \frac{\frac{(e-1)^k}{k!}e^{t+1} - \frac{(e-1)^k}{k!}e^t}{k+1}.
+\]
+
+Thus,
+\[
+f[t,t+1,\dots,t+k,t+k+1] = \frac{(e-1)^{k+1}}{(k+1)!}e^t.
+\]
+
+By induction, the statement holds for all \(n \geq 0\).
+
+\subsection*{III-b}
+
+When $t = 0$, we have
+\[
+    f[0,1,\dots,n] = \frac{(e-1)^n}{n!} = \frac{1}{n!}f^{(n)}(\xi) = \frac{e^{\xi}}{n!}.
+\]
+Therefore,
+\[
+    \xi = n\ln (e-1) 
+\]
+Since $ln (e-1) \approx 0.2351 < 0.5$, $\xi$ is located to the left of the mid point $\frac{n}{2}$
+\section*{IV. Newton's formula}
+\subsection*{IV-a}
+Using the Newton's formula, we have the table
+\[
+\begin{array}{c|cccc}
+
+0 & 5 &  &  &  \\
+1 & 3 & -2 &  & \\
+3 & 5 & 1 & 1& \\
+4 & 6 & 1 &0 & -0.25\\
+\end{array}
+\]
+
+Using Newton's formula, we have:
+\[
+p_3(f;x) = 5 - 2x + x(x-1) - \frac{1}{4}x(x-1)(x-3) = 0.25x^3 - 2.25x + 5.
+\]
+
+\subsection*{IV-b}
+Let depritive \[p'(x) = 0.75x^2 - 2.25 = 0,\] we have $x = \pm \sqrt{3}$. Clearly, $p(\sqrt{3})$ is the minimum value of $p(x)$, we can use $x = \sqrt{3} \approx 1.73$ to approximate $x_{\min}$.
+
+\section*{V. Consider $f(x) = x^7$}
+\subsection*{V-a}
+The derivative of $f(x)$ is $f'(x) = 7x^6$ and $f''(x) = 42x^5$.\\
+Using the Newton's formula, we have the table
+\[
+\begin{array}{c|cccccc}
+    0 & 0 &  &  & && \\
+    1 & 1 & 1 &  & && \\
+    1 & 1 & 7 & 6 &  &&\\
+    1 & 1 & 7 & 21 & 15&& \\
+    2 & 128 & 127 & 120 & 99 &42&\\
+    2 & 128 & 448 & 321 & 201 &102&30\\
+\end{array}
+\]
+Thus $f[0,1,1,1,2,2] = 30$
+
+\subsection*{V-b}
+The 5th derivative of $f(x)$ is \[f^{(5)}(x) = 2520x^2.\]
+Thus,\[
+\frac{1}{5!}f^{(5)}(\xi) = f[0,1,1,1,2,2] = 30.
+\]
+Therefore, $\xi = \sqrt{\frac{7}{10}} \approx 0.8367$.
+
+\section*{VI. Hermite interpolation}
+\subsection*{VI-a}
+The following is the table of divided differences:
+\[
+\begin{array}{c|cccc}
+    0 & 1 &  &  &  \\
+    1 & 2 & 1 &  &  \\
+    1 & 2 & -1 & -2 &  \\
+    3 & 0 & -1 & 0 & \frac{2}{3} \\
+    3 & 0 & 0 & \frac{1}{2}  & -\frac{5}{36} \\    
+\end{array}\]
+Thus, the Hermite interpolation polynomial is
+\[P(x) = 1 + x - 2x(x-1) + \frac{2}{3}x(x-1)^2 - \frac{5}{36}x(x-1)^2(x-3).\]
+Substitude $x = 2$ into the polynomial, we have $P(2) = \frac{11}{18}$.
+\subsection*{VI-b}
+By theoerm 2.37, we have
+\[
+f(x) - P(x) = \frac{f^{(5)}(\xi)}{5!}x(x-1)^2(x-3)^2.
+\]
+Thus, we have\[
+E_{abs}(2) = |f(2) - P(2)| \leq \frac{M}{5!}2(2-1)^2(2-3)^2 = \frac{M}{60}.
+\]
+
+\section*{VII. forward and backward differences}
+\subsection*{prove $\Delta^kf(x) = k!h^kf[x_0,x_1,\dots,x_k]$}
+\texttt{Base Case:}
+for $n = 1$, it follows it's definition.
+
+\texttt{Inductive Step:}
+
+Assume that for some $k \geq 1$,
+\[
+\Delta^kf(x) = k!h^kf[x_0,x_1,\dots,x_k].
+\]
+Using the inductive hypothesis, we have
+\begin{align*}
+    \Delta^{k+1}f(x) &= \Delta(\Delta^kf(x)) \\
+    &= \Delta(k!h^kf[x_0,x_1,\dots,x_k]) \\
+    &= k!h^k(f[x_1,x_2,\dots,x_{k+1}]-f[x_0,x_1,\dots,x_k]) \\
+    &= (k+1)!h^{k+1}f[x_0,x_1,\dots,x_{k+1}].\\
+\end{align*}
+By induction, the statement holds for all $n \geq 1$.
+
+\subsection*{prove $\nabla ^kf(x) = k!h^kf[x_0,x_{-1},\dots,x_{-k}]$}
+\texttt{Base Case:}
+for $n = 1$, it follows its definition.
+
+\texttt{Inductive Step:}
+
+Assume that for some $k \geq 1$,
+\[
+\nabla^kf(x) = k!h^kf[x_0,x_{-1},\dots,x_{-k}].
+\]
+Using the inductive hypothesis, we have
+\begin{align*}
+    \nabla^{k+1}f(x) &= \nabla(\nabla^kf(x)) \\
+    &= \nabla(k!h^kf[x_0,x_{-1},\dots,x_{-k}]) \\
+    &= k!h^k(f[x_0,x_{-1},\dots,x_{-k}]-f[x_{-1},x_{-2},\dots,x_{-k-1}]) \\
+    &= (k+1)!h^{k+1}f[x_0,x_{-1},\dots,x_{-k-1}].\\
+\end{align*}
+By induction, the statement holds for all $n \geq 1$.
+
+\section*{VIII. partial derivatives}
+The partial derivative,
+
+\begin{align*}
+    \frac{\partial}{\partial x_0} f[x_0,x_1,\dots,x_n] &= \lim_{h\to 0}\frac{f[x_0 + h,x_1,\dots,x_n] - f[x_0,x_1,\dots,x_{n-1}]}{h}.
+    \\&= \lim_{h\to 0}f[x_0,x_0+h,x_1,\dots,x_n].
+\end{align*}
+We want to show \[
+    \lim_{h\to 0}f[x_0,x_0+h,x_1,\dots,x_n] - f[x_0,x_0,x_1,\dots,x_n] = \lim_{h\to 0}h f[x_0,x_0,x_0+h,x_1,\dots,x_n]= 0.
+\]
+Since $f$ is differentiable at $x_0$, $f(x_0+h)$ is bounded, therefore $f[x_0,x_0,x_0+h,x_1,\dots,x_n]$ is also bounded. Thus, the limit is 0. Therefore, \[
+    \lim_{h\to 0}f[x_0,x_0+h,x_1,\dots,x_n] = f[x_0,x_0,x_1,\dots,x_n]
+\]
+
+In respect of other variables, by collorary 2.15, the divided difference does not depend on the order of the points. So we have\[
+\frac{\partial}{\partial x_i} f[x_0,x_1,\dots,x_i,\dots,x_n] = \frac{\partial}{\partial x_i} f[x_0,x_1,\dots,x_i,x_i,\dots,x_n]. 
+\]
+
+\section*{IX. A min-max problem}
+let $$y = \frac{2x-(a+b)}{b-a}.$$ Since $x \in [a,b], y \in [-1,1]$.
+
+Then we have \[
+\min \max_{x \in [a,b]} |a_0x^n+a_1x^{n-1}+\cdots+a_n| = \min \max_{y \in [-1,1]} |b_0y^n+b_1y^{n-1}+\cdots+b_n| = \frac{1}{2^{n-1}}|b_0|.
+\]
+where $b_0 = \dfrac{(b-a)^na_0}{2^n}$,thus\[
+\min \max_{x \in [a,b]} |a_0x^n+a_1x^{n-1}+\cdots+a_n| = \frac{(b-a)^n|a_0|}{2^{2n-1}}\]
+
+\section*{X. Imitate the proof of Chebychev Theoerm}
+The Chebychev Polynomial \[T_n(x) = \sum_{k=0}^{[\frac{n}{2}]}(-1)^kC_n^{2k}x^{n-2k}(1-x^2)^k\]
+
+suppose there exists a $p \in \mathbb{P}$ and $||\hat{p}||_\infty< ||p||_\infty$
+
+Consider the polynomial $q(x) = p(x) - \hat{p}(x)$ and sequence $x_k = \cos \frac{k}{n} \pi .$ 
+\[
+q(x_k) = \frac{(-1)^k}{2^{n-1}T_n(a)} - \hat{p}(x_k) \quad x_k = 0,1,\dots,n.
+\]
+Therefore, $q(x)$ has alternating signs at these $n + 1$ points. Hence, $q(x)$ has n zeros in $[-1,1]$. And notice that\[
+q(a) = 1-1 = 0.\] Thus, $q(x)$ has at least $n+1$ zeros, but the degree of $q(x)$ is at most $n$. Therefore $q(x)\equiv 0$. This is a contradiction. 
+
+\section*{XI. Prove $b_{n-1,k}(t) = \frac{n-k}{n}b_{n,k}(t) + \frac{k+1}{n}b_{n,k+1}(t)$
+}
+
+By the definition of $b_{n,k}(t)$, we have
+\begin{align*}
+    \frac{n-k}{n}b_{n,k}(t) + \frac{k+1}{n}b_{n,k+1}(t) &= \frac{n-k}{n}\binom{n}{k}(1-t)^{n-k}t^k + \frac{k+1}{n}\binom{n}{k+1}(1-t)^{n-k-1}t^{k+1} \\
+    &= \frac{n-k}{n}\frac{n!}{k!(n-k)!}(1-t)^{n-k}t^k + \frac{k+1}{n}\frac{n!}{(k+1)!(n-k-1)!}(1-t)^{n-k-1}t^{k+1} \\
+    &= \frac{(n-1)!}{k!(n-k-1)!}(1-t)^{n-k}t^k +\frac{(n-1)!}{k!(n-k-1)!}(1-t)^{n-k-1}t^{k+1} \\
+    &= \frac{(n-1)!}{k!(n-k-1)!}[(1-t)^{n-k}t^k + (1-t)^{n-k-1}t^{k+1}] \\
+    &= \binom{n-1}{k}(1-t)^{n-k}t^k \\
+    &= b_{n-1,k}(t).
+\end{align*}
+
+\section*{XII. Integration of Bernstein polynomials}
+Let $I_{n,k} = \int_{0}^{1}b_{n,j}(t)dt$, where $k = 0,1,\dots,n$. It's easy to see that $I_{n,0} = I_{n,n} = \frac{1}{n+1}$.
+And we have
+\begin{align*}
+    I_{n,k} &= \int_{0}^{1}b_{n,k}(t)dt \\ &= \int_{0}^{1}\binom{n}{k}(1-t)^{n-k}t^kdt\\
+    &=\binom{n}{k}\left((1-t)^{n-k}t^{k+1}\bigg|^1_0 - k  \int_{0}^{1}(1-t)^{n-k}t^kdt + (n-k)\int_{0}^{1}(1-t)^{n-k-1}t^{k+1}dt\right)\\
+    &= -kI_{n,k} + (k+1)I_{n,k+1}.\\
+\end{align*}
+Thus，\[
+I_{n,k} = I_{n,k+1}.
+\]
+Thus, we can conclude that $I_{n,k} = \frac{1}{n+1}$ for all $k = 0,1,\dots,n$ by induction.
+
+% ===============================================
+\end{document}
