@@ -30,7 +30,7 @@
 \maketitle
 
 \begin{abstract}
-  This report presents the design and implementation of interpolation algorithms, including Newton's interpolation, Hermite interpolation, and Bezier interpolation. The Runge phenomenon is discussed, and the Chebyshev interpolation method is applied to mitigate the issue. The Hermite interpolation algorithm is used to solve a problem involving a car's position and velocity. The interpolation algorithms are applied to fit data on larvae survival, and the cubic spline interpolator and exponential fitting are used to improve the results. Finally, the Bezier interpolation algorithm is used to fit a heart-shaped curve.
+  This report presents the design and implementation of interpolation algorithms, including Newton's interpolation, Hermite interpolation, and Bezier interpolation. The Runge phenomenon is discussed, and the Chebyshev interpolation method is applied to mitigate the issue. The Hermite interpolation algorithm is used to solve a problem involving a car's position and velocity. The interpolation algorithms are applied to fit data on larvae survival, and the cubic spline interpolator and exponential fitting are used to improve the results. Finally, the Bezier interpolation algorithm is used to fit a planar curve.
 \end{abstract}
 
 % ============================================
@@ -175,9 +175,9 @@ Finally, I found that the last part of the data can be better fitted using an ex
 
 Unfortunately, I did not implement the cubic spline interpolator and exponential fit in this homework. These parts of the code were generated using Python with the assistance of ChatGPT-4.
 \section{F. Bezier Interpolation}
-First, I noticed that the function graph of the heart-shaped curve is symmetric about the y-axis, so I only considered the part where \( x \geq 0 \) during interpolation, and then obtained the entire heart-shaped curve through symmetry. At this point, the equation of the function can be simplified to \( x^2 + \left(\frac{3}{2}y - \sqrt{x}\right)^2 = 3 \).
+First, I noticed that the function graph of the planar curve is symmetric about the y-axis, so I only considered the part where \( x \geq 0 \) during interpolation, and then obtained the entire planar curve through symmetry. At this point, the equation of the function can be simplified to \( x^2 + \left(\frac{3}{2}y - \sqrt{x}\right)^2 = 3 \).
 
-To correctly use Algorithm 2.74, I first parameterized the points on the heart-shaped curve:
+To correctly use Algorithm 2.74, I first parameterized the points on the planar curve:
 \[
 \begin{cases}
   x = \sqrt{3} \sin(\pi t), \\
@@ -199,34 +199,34 @@ Taking the derivatives, we get:
 \end{cases}
 \]
 
-Then I obtained the control points using Algorithm 2.74, including the characteristic points \((0, \pm \frac{2}{\sqrt{3}})\). The results for diffenrent \(m\) are shown in following figures, while Figure \ref{fig:heart} is the original curve.
+Then I obtained the control points using Algorithm 2.74, including the characteristic points \((0, \pm \frac{2}{\sqrt{3}})\). The results for diffenrent \(m\) are shown in following figures, while Figure \ref{fig:planar curve} is the original curve.
 \begin{figure}[ht]
   \centering
   \begin{minipage}[b]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/bezier0.png}
-    \caption{Heart curve}
-    \label{fig:heart}
+    \caption{planar curve}
+    \label{fig:planar curve}
   \end{minipage}
   \hfill
   \begin{minipage}[b]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/bezier1.png}
-    \caption{Heart curve with m = 10}
+    \caption{planar curve with m = 10}
     \label{fig:bezierm10}
   \end{minipage}
   \vfill
   \begin{minipage}[b]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/bezier2.png}
-    \caption{Heart curve with m = 40}
+    \caption{planar curve with m = 40}
     \label{fig:bezierm40}
   \end{minipage}
   \hfill
   \begin{minipage}[b]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/bezier3.png}
-    \caption{Heart curve with m = 160}
+    \caption{planar curve with m = 160}
     \label{fig:bezierm160}
   \end{minipage}
 \end{figure}
@@ -236,5 +236,5 @@ From the figures, we can see that when \( m = 10 \), the original curve is alrea
 Additionally, I selected the interpolation points uniformly according to the parameter \( t \), which is a relatively good choice. However, if the points were selected uniformly according to the curve length, better results could be obtained. Due to the difficulty of implementation, I did not achieve this.
 % ===============================================
 \section*{ \center{\normalsize {Acknowledgement}} }
-The Python code in the plotCode file was largely generated with the assistance of ChatGPT.
+The Python codes in the plotCode folder were largely generated with the assistance of ChatGPT.
 \end{document}

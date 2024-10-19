@@ -78,5 +78,9 @@ int main() {
     }
 
     outFile.close();
+    std::cout << "Data written to file.\n";
+    std::cout << "Run the following command in the terminal to plot the data:\n";
+    std::cout << "python3 plotCode/plotF.py\n";
+
     return 0;
 }
