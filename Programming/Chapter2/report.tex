@@ -1,0 +1,159 @@
+\documentclass[a4paper]{article}
+\usepackage[affil-it]{authblk}
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{array}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
+\usepackage{float}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+
+
+\begin{document}
+% =================================================
+\title{Numerical Analysis  programming homework \# 2}
+
+\author{Liang Yuwei 3230102923
+  \thanks{Electronic address: \texttt{liangyuwei631@gmail.com}}}
+\affil{(Mathematics and Applied Mathematics 2302), Zhejiang University }
+
+
+\date{\today}
+
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+
+% ============================================
+\section{A. Interpolator Design}
+
+\subsection{Class Structure and Inheritance}
+The \textbf{Interpolator} class serves as a base class, which is inherited by the derived classes \textbf{NewtonInterpolator} and \textbf{HermiteInterpolator}.\\
+As in problem F, the interpolation object is a point. Therefore, I designed the \textbf{Point} class and another base class, \textbf{PointInterpolator}, which is inherited by \textbf{BezierInterpolator}.
+
+\subsection{Newton Interpolator}
+The \textbf{NewtonInterpolator} class is derived from the \textbf{Interpolator} base class. It is designed to perform Newton's interpolation. The class has two constructors and several member functions.
+
+The first constructor takes two vectors, \texttt{x\_values} and \texttt{f\_values}, which represent the x-coordinates and corresponding function values, respectively. It initializes the divided differences table and calls the \texttt{computeDividedDifferences()} function to compute it.
+
+The second constructor takes a function object and a vector of x-coordinates. It evaluates the function at each x-coordinate to obtain the corresponding function values and then initializes the divided differences table.
+
+The \texttt{interpolate()} function performs the interpolation for a given x-value using the precomputed divided differences.
+
+The \texttt{printInternalData()} function prints the internal data, including the x-values and the main dialog of divided differences table.
+
+The \texttt{computeDividedDifferences()} function computes the divided differences table. The following is the pseudocode:
+\begin{lstlisting}
+for i = 0 to n
+    dd[i][0] = f[i]
+for j = 1 to n
+    for i = j to n
+        dd[i][j] = (dd[i][j-1] - dd[i-1][j-1]) / (x[i] - x[i-j])
+\end{lstlisting}
+
+\subsection{Hermite Interpolator}
+The \textbf{HermiteInterpolator} class is derived from the \textbf{Interpolator} base class. It is designed to perform Hermite interpolation, which takes into account both function values and their derivatives at given points. The class has a constructor and several member functions.
+
+For simplicity of design, I only considered the case where all interpolation points have first derivatives and no higher-order derivatives, which meets the requirements of problem D.
+
+The constructor takes three vectors: \texttt{x\_values}, \texttt{y\_values}, and \texttt{yDerivative\_values}. It initializes the divided differences table and calls the \texttt{computeCoefficients()} function to compute it.
+
+The \texttt{interpolate()} function performs the interpolation for a given x-value using the precomputed divided differences.
+
+The \texttt{printInternalData()} function prints the internal data, including the x-values and the main dialog of divided differences table.
+
+The \texttt{computeCoefficients()} function computes the divided differences table. The following is the pseudocode:
+\begin{lstlisting}
+n = x.size()
+z = new array of size 2*n
+for i = 0 to n-1
+  z[2*i] = x[i]
+  z[2*i + 1] = x[i]
+  dd[2*i][0] = y[i]
+  dd[2*i + 1][0] = y[i]
+  dd[2*i + 1][1] = yd[i]
+  if i > 0
+    dd[2*i][1] = (y[i] - y[i-1]) / (x[i] - x[i-1])
+for j = 2 to 2*n-1
+  for i = j to 2*n-1
+    dd[i][j] = (dd[i][j-1] - dd[i-1][j-1]) / (z[i] - z[i-j])
+\end{lstlisting}
+
+\subsection{Bezier Interpolator}
+The \textbf{BezierInterpolator} class is derived from the \textbf{PointInterpolator} base class. It is designed to perform cubic Bezier interpolation. The class has a constructor and several member functions.
+
+The constructor takes a vector of control points sets, where each set contains exactly four points. It initializes the control points sets and checks if they are valid. If any set does not contain exactly four points, an exception is thrown.
+
+The \texttt{Interpolate()} function performs the interpolation for a given parameter \( t \) in the range \([0, 1]\). It first determines the appropriate segment for the given \( t \) and maps \( t \) to the local range \([0, 1]\) within that segment. It then calls the \texttt{calculateBezierPoint()} function to compute the interpolated point.
+
+The \texttt{calculateBezierPoint()} function computes the Bezier point for a given set of control points and a parameter \( t \). It uses the cubic Bezier formula:
+\[
+\mathbf{P}(t) = (1-t)^3 \mathbf{P}_0 + 3(1-t)^2 t \mathbf{P}_1 + 3(1-t) t^2 \mathbf{P}_2 + t^3 \mathbf{P}_3
+\]
+where \(\mathbf{P}_0, \mathbf{P}_1, \mathbf{P}_2, \mathbf{P}_3\) are the control points.
+
+\section{B. Runge Phenomenon}
+First, I implemented the Runge function \( f(x) = \frac{1}{1 + x^2} \) and computed the interpolating polynomials. Then, I plotted the function and its interpolating polynomials in the range \([-1, 1]\) using Python. The resulting plot is shown in Figure \ref{fig:runge}.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/Runge.png}
+    \caption{Runge Phenomenon}
+    \label{fig:runge}
+\end{figure}
+
+From the plot, we can observe that the interpolating polynomials exhibit oscillations near the endpoints of the interval \([-1, 1]\) and do not converge uniformly to the function.
+
+\section{C. Chebychev Interpolate}
+First, I generate the Chebyshev nodes in the interval \([-1, 1]\) and evaluate the Runge function at these nodes. Then, I perform Newton's interpolation using the Chebyshev nodes and plot the interpolating polynomial. The resulting plot is shown in Figure \ref{fig:chebyshev}.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/Chebyshev.png}
+    \caption{Chebyshev interpolation}
+    \label{fig:chebyshev}
+\end{figure}
+From the plot, we can observe that the interpolating polynomial using Chebyshev nodes exhibits less oscillation near the endpoints of the interval \([-1, 1]\) compared to the interpolating polynomial using equidistant nodes.
+
+\section{D. Hermite Interpolation}
+I implemented the Hermite interpolation algorithm and following is the result:
+\begin{lstlisting}
+  (a) The position at t = 10 seconds: 712.774 feet
+  (b) The maximum velocity is 81.2615 feet/second, reached at t = 6.678 seconds
+   The maximum velocity exceeds 81 feet/second
+\end{lstlisting}
+In the second question, I use the secant to subtitute the slope of the function, in other words, I use mean velocity to subtitute velocity. And by Langrange mean value theorem, we can know that the car reached 81.2615 feet/second at some moment between 6.678 and 6.679 seconds.
+
+\section{E. larvae survival}
+using the newton interpolation, we can get the result:
+\begin{figure}[ht]
+  \centering
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/larave28days.png}
+    \caption{Larvae's weight in 28 days with Newton interpolation}
+    \label{fig:larvae28}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/larvae43days.png}
+    \caption{Larvae's weight in 43 days with Newton interpolation}
+    \label{fig:larvae43}
+  \end{minipage}
+\end{figure}
+
+From Figure \ref{fig:larvae28}, we can observe that overfitting occurs, and sample 1 even shows negative weight values in the first five days.\\
+In Figure \ref{fig:larvae43}, we can see that data in 43 day results in even greater deviations. This is because we should not use interpolation polynomials to estimate points beyond the range of our data.
+
+To fix this
+% ===============================================
+\section*{ \center{\normalsize {Acknowledgement}} }
+
+\end{document}
