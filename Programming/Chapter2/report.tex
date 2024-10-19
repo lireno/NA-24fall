@@ -30,6 +30,7 @@
 \maketitle
 
 \begin{abstract}
+  This report presents the design and implementation of interpolation algorithms, including Newton's interpolation, Hermite interpolation, and Bezier interpolation. The Runge phenomenon is discussed, and the Chebyshev interpolation method is applied to mitigate the issue. The Hermite interpolation algorithm is used to solve a problem involving a car's position and velocity. The interpolation algorithms are applied to fit data on larvae survival, and the cubic spline interpolator and exponential fitting are used to improve the results. Finally, the Bezier interpolation algorithm is used to fit a heart-shaped curve.
 \end{abstract}
 
 % ============================================
@@ -119,6 +120,7 @@ First, I generate the Chebyshev nodes in the interval \([-1, 1]\) and evaluate t
     \caption{Chebyshev interpolation}
     \label{fig:chebyshev}
 \end{figure}
+
 From the plot, we can observe that the interpolating polynomial using Chebyshev nodes exhibits less oscillation near the endpoints of the interval \([-1, 1]\) compared to the interpolating polynomial using equidistant nodes.
 
 \section{D. Hermite Interpolation}
@@ -131,12 +133,12 @@ I implemented the Hermite interpolation algorithm and following is the result:
 In the second question, I use the secant to subtitute the slope of the function, in other words, I use mean velocity to subtitute velocity. And by Langrange mean value theorem, we can know that the car reached 81.2615 feet/second at some moment between 6.678 and 6.679 seconds.
 
 \section{E. larvae survival}
-using the newton interpolation, we can get the result:
+First, I try to use Newton interpolation to fit the data. The result is shown in Figure \ref{fig:larvae28} and Figure \ref{fig:larvae43}.
 \begin{figure}[ht]
   \centering
   \begin{minipage}[b]{0.45\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/larave28days.png}
+    \includegraphics[width=\textwidth]{figures/larvae28days.png}
     \caption{Larvae's weight in 28 days with Newton interpolation}
     \label{fig:larvae28}
   \end{minipage}
@@ -147,13 +149,92 @@ using the newton interpolation, we can get the result:
     \caption{Larvae's weight in 43 days with Newton interpolation}
     \label{fig:larvae43}
   \end{minipage}
+  \vfill
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/cubicspline.png}
+    \caption{Larvae's weight in 43 days with cubic spline interpolation}
+    \label{fig:larvaeCubicSpline}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/expfit.png}
+    \caption{Exponential fitting}
+    \label{fig:expfit}
+  \end{minipage}
 \end{figure}
 
-From Figure \ref{fig:larvae28}, we can observe that overfitting occurs, and sample 1 even shows negative weight values in the first five days.\\
-In Figure \ref{fig:larvae43}, we can see that data in 43 day results in even greater deviations. This is because we should not use interpolation polynomials to estimate points beyond the range of our data.
+From Figure \ref{fig:larvae28}, we can observe that overfitting occurs, and sample 1 even shows negative weight values in the first five days.
 
-To fix this
+In Figure \ref{fig:larvae43}, we can see that weight in 43 day shows in even greater deviations. This is because we should not use interpolation polynomials to estimate points beyond the range of our data.
+
+To fix this, I tried to use the cubic spline interpolator, and the result is shown in Figure \ref{fig:larvaeCubicSpline}. It is much better than the Newton interpolator, but it still shows some problems.
+
+Finally, I found that the last part of the data can be better fitted using an exponential function plus a constant, as shown in Figure \ref{fig:expfit}. This method provides a better fit for the data, leading us to conclude that sample 1 will not die in 43 days, while sample 2 will.
+
+Unfortunately, I did not implement the cubic spline interpolator and exponential fit in this homework. These parts of the code were generated using Python with the assistance of ChatGPT-4.
+\section{F. Bezier Interpolation}
+First, I noticed that the function graph of the heart-shaped curve is symmetric about the y-axis, so I only considered the part where \( x \geq 0 \) during interpolation, and then obtained the entire heart-shaped curve through symmetry. At this point, the equation of the function can be simplified to \( x^2 + \left(\frac{3}{2}y - \sqrt{x}\right)^2 = 3 \).
+
+To correctly use Algorithm 2.74, I first parameterized the points on the heart-shaped curve:
+\[
+\begin{cases}
+  x = \sqrt{3} \sin(\pi t), \\
+  \frac{3}{2}y - \sqrt{x} = \sqrt{3} \cos(\pi t)
+\end{cases}
+\implies
+\begin{cases}
+  x = \sqrt{3} \sin(\pi t), \\
+  y = \frac{2}{3} \left( \sqrt{3} \cos(\pi t) + \sqrt{x} \right)
+\end{cases}
+\]
+where \( t \in [0, 1] \).
+
+Taking the derivatives, we get:
+\[
+\begin{cases}
+  \frac{dx}{dt} &= \sqrt{3} \cos(\pi t), \\
+  \frac{dy}{dt} &= -\frac{2}{3} \left( \sqrt{3} \sin(\pi t) + \frac{1}{2\sqrt{x}} \frac{dx}{dt} \right).
+\end{cases}
+\]
+
+Then I obtained the control points using Algorithm 2.74, including the characteristic points \((0, \pm \frac{2}{\sqrt{3}})\). The results for diffenrent \(m\) are shown in following figures, while Figure \ref{fig:heart} is the original curve.
+\begin{figure}[ht]
+  \centering
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/bezier0.png}
+    \caption{Heart curve}
+    \label{fig:heart}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/bezier1.png}
+    \caption{Heart curve with m = 10}
+    \label{fig:bezierm10}
+  \end{minipage}
+  \vfill
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/bezier2.png}
+    \caption{Heart curve with m = 40}
+    \label{fig:bezierm40}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/bezier3.png}
+    \caption{Heart curve with m = 160}
+    \label{fig:bezierm160}
+  \end{minipage}
+\end{figure}
+
+From the figures, we can see that when \( m = 10 \), the original curve is already well-fitted. However, when \( m = 40 \), due to improper handling of the boundary conditions at the upper and lower endpoints, some issues appear at these points. When \( m = 160 \), the fitted curve almost perfectly matches the original curve.
+
+Additionally, I selected the interpolation points uniformly according to the parameter \( t \), which is a relatively good choice. However, if the points were selected uniformly according to the curve length, better results could be obtained. Due to the difficulty of implementation, I did not achieve this.
 % ===============================================
 \section*{ \center{\normalsize {Acknowledgement}} }
-
+The Python code in the plotCode file was largely generated with the assistance of ChatGPT.
 \end{document}

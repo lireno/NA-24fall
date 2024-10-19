@@ -23,8 +23,6 @@ int main() {
     std::vector<double> sp1_weights = {6.67, 17.3, 42.7, 37.3, 30.1, 29.3, 28.7};
     std::vector<double> sp2_weights = {6.67, 16.1, 18.9, 15.0, 10.6, 9.44, 8.89};
 
-    double day_43 = 43;
-
     predictSurvival(days, sp1_weights, "Sp1", 43);
     predictSurvival(days, sp2_weights, "Sp2", 43);
 

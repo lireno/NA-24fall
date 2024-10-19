@@ -1,9 +1,8 @@
-#include "Interpolator.hpp" // Assuming this header file includes the BezierInterpolator class
+#include "Interpolator.hpp"
 #include <cmath>
 #include <fstream>
 #include <vector>
 
-// Define a struct to store both the point and its tangent
 struct pointWithTangent {
     point position;
     point tangent;
@@ -13,7 +12,7 @@ struct pointWithTangent {
 
 std::vector<pointWithTangent> computeMarkerPointsWithTangents(int m) {
     std::vector<pointWithTangent> marker_points_with_tangents;
-    double t_step = 1.0 / m; // Divide the interval [0, 1] into m steps
+    double t_step = 1.0 / m;
 
     for (int i = 0; i <= m; ++i) {
         double t = i * t_step;
@@ -34,7 +33,6 @@ std::vector<pointWithTangent> computeMarkerPointsWithTangents(int m) {
     return marker_points_with_tangents;
 }
 
-// Function to compute control points for cubic Bezier curves using the points and their tangents
 std::vector<std::vector<point>> computeControlPoints(const std::vector<pointWithTangent>& marker_points_with_tangents) {
     std::vector<std::vector<point>> control_points_sets;
 
