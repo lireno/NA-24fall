@@ -69,6 +69,7 @@ int main() {
         std::vector<std::vector<point>> control_points_sets = computeControlPoints(marker_points_with_tangents);
         BezierInterpolator bezier_interpolator(control_points_sets);
 
+        // generate points for plotting later
         for (double t = 0; t <= 1.0; t += 0.001) {
             point interpolated_point = bezier_interpolator.Interpolate(t);
             outFile << interpolated_point.getX() << " " << interpolated_point.getY() << "\n"; // Write x, y coordinates

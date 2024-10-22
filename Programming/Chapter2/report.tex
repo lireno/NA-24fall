@@ -65,7 +65,7 @@ The \textbf{HermiteInterpolator} class is derived from the \textbf{Interpolator}
 
 For simplicity of design, I only considered the case where all interpolation points have first derivatives and no higher-order derivatives, which meets the requirements of problem D.
 
-The constructor takes three vectors: \texttt{x\_values}, \texttt{y\_values}, and \texttt{yDerivative\_values}. It initializes the divided differences table and calls the \texttt{computeCoefficients()} function to compute it.
+The constructor takes three vectors of \texttt{same size}: \texttt{x\_values}, \texttt{y\_values}, and \texttt{yDerivative\_values}. It initializes the divided differences table and calls the \texttt{computeCoefficients()} function to compute it.
 
 The \texttt{interpolate()} function performs the interpolation for a given x-value using the precomputed divided differences.
 

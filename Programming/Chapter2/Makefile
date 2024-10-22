@@ -18,7 +18,6 @@ TEXFILE = report
 TEX = pdflatex
 BIB = bibtex
 
-# 最终目标
 all: $(PROBLEM_TARGETS) report
 
 %: $(SRCDIR)/Problem%.cpp
@@ -26,7 +25,6 @@ all: $(PROBLEM_TARGETS) report
 	$(CXX) $(CXXFLAGS) -o $(BINDIR)/Problem$@ $<
 	$(BINDIR)/Problem$@
 
-# 规则：编译 src 下的 Problem*.cpp 并输出到 bin 文件夹
 $(BINDIR)/Problem%: $(SRCDIR)/Problem%.cpp
 	@mkdir -p $(BINDIR)  # 如果 bin 文件夹不存在，则创建
 	$(CXX) $(CXXFLAGS) -o $@ $<
@@ -40,7 +38,6 @@ run: $(PROBLEM_TARGETS)
 		echo ""; \
 	done
 
-# 生成 PDF 报告
 report: $(TEXFILE).tex
 	# First pdflatex pass
 	$(TEX) $(TEXFILE).tex
@@ -50,6 +47,5 @@ report: $(TEXFILE).tex
 	$(TEX) $(TEXFILE).tex
 	$(TEX) $(TEXFILE).tex
 
-# 清理生成的文件
 clean:
 	rm -rf $(BINDIR)/*.out $(BINDIR)/* $(BINDIR)/*.o *.aux *.bbl *.blg *.log *.out *.toc *.pdf *.run.xml *-blx.bib *.synctex.gz
