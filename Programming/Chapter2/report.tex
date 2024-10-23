@@ -175,7 +175,7 @@ Finally, I found that the last part of the data can be better fitted using an ex
 
 Unfortunately, I did not implement the cubic spline interpolator and exponential fit in this homework. These parts of the code were generated using Python with the assistance of ChatGPT-4.
 \section{F. Bezier Interpolation}
-First, I noticed that the function graph of the planar curve is symmetric about the y-axis, so I only considered the part where \( x \geq 0 \) during interpolation, and then obtained the entire planar curve through symmetry. At this point, the equation of the function can be simplified to \( x^2 + \left(\frac{3}{2}y - \sqrt{x}\right)^2 = 3 \).
+First, I noticed that the function graph of the planar curve is symmetric about the y-axis, so I only considered the part where \( x \geq 0 \) during interpolation, and then obtained the entire planar curve through symmetry. Correspondingly, when selecting control points later, I also selected only half the number of points. And at this point, the equation of the function can be simplified to \( x^2 + \left(\frac{3}{2}y - \sqrt{x}\right)^2 = 3 \).
 
 To correctly use Algorithm 2.74, I first parameterized the points on the planar curve:
 \[
@@ -199,7 +199,11 @@ Taking the derivatives, we get:
 \end{cases}
 \]
 
-Then I obtained the control points using Algorithm 2.74, including the characteristic points \((0, \pm \frac{2}{\sqrt{3}})\). The results for diffenrent \(m\) are shown in following figures, while Figure \ref{fig:planar curve} is the original curve.
+In fact, I found that Algorithm 2.74 has some issues. It does not adjust the length of the tangent vector \(\gamma'\) based on the distance between \(p_j\) and \(p_{j+1}\). As \(m\) increases and the step size decreases, the length of \(\gamma'\) does not decrease accordingly, which leads to some problems. To achieve better results, I modified Algorithm 2.74 by setting the lengths of \(\gamma'(p_j)\) and \(\gamma'(p_{j+1})\) to be the distance between \(p_j\) and \(p_{j+1}\).
+
+Then I obtained the control points using modified Algorithm 2.74, including the characteristic points \((0, \pm \frac{2}{\sqrt{3}})\), which are taken at \( t = 0 \) and \( t = 1 \).
+
+Next, I used the C++ program to generate enough points for each interpolation curve and stored them in the `pointsInF.txt` file in the `plotCode` folder. Then, I used a Python program to plot the results. The results for different \(m\) are shown in the following figures, while Figure \ref{fig:planar curve} is the original curve.
 \begin{figure}[ht]
   \centering
   \begin{minipage}[b]{0.45\textwidth}
@@ -211,29 +215,49 @@ Then I obtained the control points using Algorithm 2.74, including the character
   \hfill
   \begin{minipage}[b]{0.45\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/bezier1.png}
-    \caption{planar curve with m = 10}
+    \includegraphics[width=\textwidth]{figures/bezier_update1.png}
+    \caption{interpolated planar curve with m = 10}
     \label{fig:bezierm10}
   \end{minipage}
   \vfill
   \begin{minipage}[b]{0.45\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/bezier2.png}
-    \caption{planar curve with m = 40}
+    \includegraphics[width=\textwidth]{figures/bezier_update2.png}
+    \caption{interpolated planar curve with m = 40}
     \label{fig:bezierm40}
   \end{minipage}
   \hfill
   \begin{minipage}[b]{0.45\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/bezier3.png}
-    \caption{planar curve with m = 160}
+    \includegraphics[width=\textwidth]{figures/bezier_update3.png}
+    \caption{interpolated planar curve with m = 160}
     \label{fig:bezierm160}
   \end{minipage}
 \end{figure}
 
-From the figures, we can see that when \( m = 10 \), the original curve is already well-fitted. However, when \( m = 40 \), due to improper handling of the boundary conditions at the upper and lower endpoints, some issues appear at these points. When \( m = 160 \), the fitted curve almost perfectly matches the original curve.
 
-Additionally, I selected the interpolation points uniformly according to the parameter \( t \), which is a relatively good choice. However, if the points were selected uniformly according to the curve length, better results could be obtained. Due to the difficulty of implementation, I did not achieve this.
+
+From the figures, we can see that when \( m = 10 \), the original curve is already well-fitted. As \( m \) increases, the curve becomes smoother and closer to the original curve. When \( m = 40 \), the curve is already almost indistinguishable from the original curve. 
+
+To have a more intuitive understanding of the curve fitting effect, I wrote a program to calculate the maximum distance between the original curve and the interpolated curve. Since the fitting effect near the endpoints is not very good, I also calculated the maximum distance when \( t \in (0.2, 0.8) \). The results are shown in the table below:
+
+We can see from Table \ref{tab:interpolation_distances} that as \( m \) increases, the maximum distance decreases significantly.
+\begin{table}[H]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{m} & \textbf{Max Distance} & \textbf{Max Distance (t in (0.2, 0.8))} \\
+    \hline
+    10 & 0.195048 & 0.0348658 \\
+    \hline
+    40 & 0.0824217 & 0.00237979 \\
+    \hline
+    160 & 0.0422204 & 0.000149915 \\
+    \hline
+  \end{tabular}
+  \caption{Maximum distances between interpolated points and actual points for different values of m}
+  \label{tab:interpolation_distances}
+\end{table}
 % ===============================================
 \section*{ \center{\normalsize {Acknowledgement}} }
 The Python codes in the plotCode folder were largely generated with the assistance of ChatGPT.

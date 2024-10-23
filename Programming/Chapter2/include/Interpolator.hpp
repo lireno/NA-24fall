@@ -34,6 +34,9 @@ class point {
 
     void normalize() {
         double length = std::sqrt(x * x + y * y);
+        if (length < 1e-8) {
+            return;
+        }
         x /= length;
         y /= length;
     }
@@ -49,6 +52,10 @@ class point {
     double x;
     double y;
 };
+
+double distance(const point& p1, const point& p2) {
+    return std::sqrt((p1.getX() - p2.getX()) * (p1.getX() - p2.getX()) + (p1.getY() - p2.getY()) * (p1.getY() - p2.getY()));
+}
 
 class PointInterpolator {
   public:
