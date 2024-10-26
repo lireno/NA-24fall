@@ -174,6 +174,9 @@ To fix this, I tried to use the cubic spline interpolator, and the result is sho
 Finally, I found that the last part of the data can be better fitted using an exponential function plus a constant, as shown in Figure \ref{fig:expfit}. This method provides a better fit for the data, leading us to conclude that sample 1 will not die in 43 days, while sample 2 will.
 
 Unfortunately, I did not implement the cubic spline interpolator and exponential fit in this homework. These parts of the code were generated using Python with the assistance of ChatGPT-4.
+
+By the way, it is advisable to add two private member variables, \texttt{minX} and \texttt{maxX}, to the \textbf{Interpolator} class. These variables will store the range of the interpolation data and will throw an exception if the input x-value is out of this range.
+
 \section{F. Bezier Interpolation}
 First, I noticed that the function graph of the planar curve is symmetric about the y-axis, so I only considered the part where \( x \geq 0 \) during interpolation, and then obtained the entire planar curve through symmetry. Correspondingly, when selecting control points later, I also selected only half the number of points. And at this point, the equation of the function can be simplified to \( x^2 + \left(\frac{3}{2}y - \sqrt{x}\right)^2 = 3 \).
 

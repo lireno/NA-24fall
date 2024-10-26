@@ -46,6 +46,7 @@ report: $(TEXFILE).tex
 	# Second and third pdflatex pass
 	$(TEX) $(TEXFILE).tex
 	$(TEX) $(TEXFILE).tex
+	rm -f $(TEXFILE).aux $(TEXFILE).bbl $(TEXFILE).blg $(TEXFILE).log $(TEXFILE).out $(TEXFILE).toc $(TEXFILE).run.xml $(TEXFILE)-blx.bib $(TEXFILE).synctex.gz
 
 clean:
-	rm -rf $(BINDIR)/*.out $(BINDIR)/* $(BINDIR)/*.o *.aux *.bbl *.blg *.log *.out *.toc *.pdf *.run.xml *-blx.bib *.synctex.gz
+	rm -rf $(BINDIR)/*.o *.aux *.bbl *.blg *.log *.out *.toc *.pdf *.run.xml *-blx.bib *.synctex.gz
