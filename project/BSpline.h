@@ -365,14 +365,77 @@ class PeriodicCubicBSpline : public CubicBSpline {
             throw std::runtime_error("Number of nodes and values must be the same.");
         }
         coefficients_.clear();
+        std::vector<double> s(7);
+        std::vector<double> t(7);
+        double x0 = nodes_[0];
+        double xn = nodes_[n - 1];
+        for (int i = 0; i < 3; ++i) {
+            s[i] = basis_[i].derivative(x0);
+            t[i] = basis_[i].secondDerivative(x0);
+        }
+        for (int i = 0; i < 3; ++i) {
+            s[i + 3] = basis_[n - 1 + i].derivative(xn);
+            t[i + 3] = basis_[n - 1 + i].secondDerivative(xn);
+        }
+        s[6] = 0;
+        t[6] = 0;
+
         std::vector<double> a_star = a;
-        a_star.erase(a_star.begin());
+        std::vector<double> b_star = b;
         std::vector<double> c_star = c;
-        c_star.pop_back();
+        std::vector<double> d_star = values_;
+
+        double m1 = s[0] / a_star[0];
+        s[0] -= m1 * a_star[0];
+        s[1] -= m1 * b_star[0];
+        s[2] -= m1 * c_star[0];
+        s[6] -= m1 * d_star[0];
+
+        double m2 = t[0] / a_star[0];
+        t[0] -= m2 * a_star[0];
+        t[1] -= m2 * b_star[0];
+        t[2] -= m2 * c_star[0];
+        t[6] -= m2 * d_star[0];
+
+        double m3 = s[5] / c_star[n - 1];
+        s[4] -= m3 * b_star[n - 1];
+        s[3] -= m3 * a_star[n - 1];
+        s[5] -= m3 * c_star[n - 1];
+        s[6] -= m3 * d_star[n - 1];
+
+        double m4 = t[5] / c_star[n - 1];
+        t[4] -= m4 * b_star[n - 1];
+        t[3] -= m4 * a_star[n - 1];
+        t[5] -= m4 * c_star[n - 1];
+        t[6] -= m4 * d_star[n - 1];
+
+        if (std::abs(t[3]) < 1e-8) {
+            std::swap(s, t);
+        }
+
+        double m5 = t[1] / s[1];
+        for (int i = 0; i < n; ++i) {
+            t[i] -= m5 * s[i];
+        }
+
+        double m6 = a[1] / s[1];
+        d_star[1] -= m6 * d_star[0];
+        double an = -m6 * s[4];
+
+        d_star.erase(d_star.begin());
+        d_star.push_back(t[6]);
+        a_star.erase(a_star.begin());
+        a_star.erase(a_star.begin());
+        a_star.push_back(t[3]);
+        b_star.erase(b_star.begin());
+        b_star.push_back(t[4]);
+        c_star.erase(c_star.begin());
         coefficients_.resize(n);
-        cyclicthomasAlgorithm(a, b, c, values_, coefficients_, a[0], c[n - 1]);
-        coefficients_.push_back(coefficients_[0]);
-        coefficients_.insert(coefficients_.begin(), coefficients_[n - 1]);
+        cyclicthomasAlgorithm(a_star, b_star, c_star, d_star, coefficients_, an, t[2]);
+        double c1 = (s[6] - coefficients_[n - 1] * s[4]) / s[1];
+        double c0 = (values_[0] - b[0] * c1 - c[0] * coefficients_[0]) / a[0];
+        coefficients_.insert(coefficients_.begin(), c1);
+        coefficients_.insert(coefficients_.begin(), c0);
     };
 };
 
