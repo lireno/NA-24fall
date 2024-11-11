@@ -26,9 +26,9 @@ class Bbase : public Function {
         }
         if (degree_ == 1) {
             if (x > nodes_[1]) {
-                return (nodes_[2] - x) / (nodes_[1] - nodes_[0]);
+                return (nodes_[2] - x) / (nodes_[2] - nodes_[1]);
             } else {
-                return (x - nodes_[0]) / (nodes_[2] - nodes_[1]);
+                return (x - nodes_[0]) / (nodes_[1] - nodes_[0]);
             }
         } else {
             std::vector<double> nodes1(nodes_.begin(), nodes_.end() - 1);
@@ -343,4 +343,37 @@ class NaturalCubicBSpline : public CubicBSpline {
         solveUniqueTridialog(a, b, c, values_, coefficients_, s, t);
     };
 };
+
+class PeriodicCubicBSpline : public CubicBSpline {
+  public:
+    PeriodicCubicBSpline(const std::vector<double>& nodes, const std::vector<double>& values)
+        : CubicBSpline(nodes, values) {
+        if (std::abs(values.front() - values.back()) > 1e-7) {
+            throw std::runtime_error("The first and last values must be the same for a periodic spline.");
+        }
+        computeSpline();
+    }
+
+    PeriodicCubicBSpline(const Function& f, const std::vector<double>& nodes)
+        : CubicBSpline(f, nodes) {
+        computeSpline();
+    }
+
+  protected:
+    virtual void computeSpline() override {
+        if (values_.size() != n) {
+            throw std::runtime_error("Number of nodes and values must be the same.");
+        }
+        coefficients_.clear();
+        std::vector<double> a_star = a;
+        a_star.erase(a_star.begin());
+        std::vector<double> c_star = c;
+        c_star.pop_back();
+        coefficients_.resize(n);
+        cyclicthomasAlgorithm(a, b, c, values_, coefficients_, a[0], c[n - 1]);
+        coefficients_.push_back(coefficients_[0]);
+        coefficients_.insert(coefficients_.begin(), coefficients_[n - 1]);
+    };
+};
+
 #endif // BSPLINE_H
