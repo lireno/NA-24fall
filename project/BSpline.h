@@ -81,13 +81,14 @@ class Bbase : public Function {
 class BSpline : public Function {
   public:
     BSpline(const std::vector<double>& nodes, const std::vector<double>& values)
-        : nodes_(nodes), values_(values) {}
+        : nodes_(nodes), values_(values) { n = nodes.size(); }
 
     BSpline(const Function& f, const std::vector<double>& nodes)
         : nodes_(nodes) {
         for (double x : nodes) {
             values_.push_back(f(x));
         }
+        n = nodes.size();
     }
 
     virtual ~BSpline() = default;
@@ -115,7 +116,7 @@ class BSpline : public Function {
             throw std::runtime_error("Spline not computed.");
         }
 
-        for (size_t i = 0; i < nodes_.size() - 1; ++i) {
+        for (size_t i = 0; i < n - 1; ++i) {
             double xStart = nodes_[i];
             double xEnd = nodes_[i + 1];
             double step = (xEnd - xStart) / numSamplesPerInterval;
@@ -134,9 +135,10 @@ class BSpline : public Function {
     std::vector<double> coefficients_;
     std::vector<Bbase> basis_;
     int degree_;
+    int n; // size of nodes_
+
     virtual void computeSpline() = 0;
     void generatebasis() {
-        int n = nodes_.size();
         int degree = degree_;
 
         extended_nodes_.clear();
@@ -190,22 +192,93 @@ class CubicBSpline : public BSpline {
         : BSpline(nodes, values) {
         degree_ = 3;
         generatebasis();
-        computeSpline();
+        computeVal();
     }
 
     CubicBSpline(const Function& f, const std::vector<double>& nodes)
         : BSpline(f, nodes) {
         degree_ = 3;
         generatebasis();
+        computeVal();
+    }
+
+  protected:
+    std::vector<double> a; // store the values of nodes for each basis
+    std::vector<double> b;
+    std::vector<double> c;
+
+    void solveUniqueTridialog(const std::vector<double>& a, const std::vector<double>& b, const std::vector<double>& c, const std::vector<double>& d, std::vector<double>& x, const std::vector<double>& s, const std::vector<double>& t) {
+        std::vector<double> a_star = a;
+        std::vector<double> b_star = b;
+        std::vector<double> c_star = c;
+        std::vector<double> d_star = d;
+        double m1 = a_star[0] / s[0];
+        b_star[0] = b_star[0] - m1 * s[1];
+        c_star[0] = c_star[0] - m1 * s[2];
+        d_star[0] = d_star[0] - m1 * s[3];
+        double m2 = c[n - 1] / t[2];
+        a_star[n - 1] = a_star[n - 1] - m2 * t[0];
+        b_star[n - 1] = b_star[n - 1] - m2 * t[1];
+        d_star[n - 1] = d_star[n - 1] - m2 * t[3];
+        a_star.erase(a_star.begin());
+        c_star.pop_back();
+        thomasAlgorithm(a_star, b_star, c_star, d_star, x);
+    };
+
+  private:
+    void computeVal() {
+        int n = nodes_.size();
+        a.resize(n);
+        b.resize(n);
+        c.resize(n);
+        for (int i = 0; i < n; ++i) {
+            a[i] = basis_[i](nodes_[i]);
+            b[i] = basis_[i + 1](nodes_[i]);
+            c[i] = basis_[i + 2](nodes_[i]);
+        }
+    }
+};
+
+class CompleteCubicBSpline : public CubicBSpline {
+  public:
+    CompleteCubicBSpline(const std::vector<double>& nodes, const std::vector<double>& values, double da, double db)
+        : CubicBSpline(nodes, values) {
+        derivative_a = da;
+        derivative_b = db;
+        computeSpline();
+    }
+
+    CompleteCubicBSpline(const Function& f, const std::vector<double>& nodes)
+        : CubicBSpline(f, nodes) {
+        computeDerivative(f);
         computeSpline();
     }
 
   protected:
     virtual void computeSpline() override {
-        if (nodes_.size() != values_.size()) {
+        if (values_.size() != n) {
             throw std::runtime_error("Number of nodes and values must be the same.");
         }
+        coefficients_.clear();
+        std::vector<double> s(4);
+        std::vector<double> t(4);
+        double x0 = nodes_[0];
+        double xn = nodes_[n - 1];
+        for (int i = 0; i < 3; ++i) {
+            s[i] = basis_[i].derivative(x0);
+            t[i] = basis_[n - 1 + i](xn);
+        }
+        s[3] = derivative_a;
+        t[3] = derivative_b;
+        solveUniqueTridialog(a, b, c, values_, coefficients_, s, t);
+    };
+
+  private:
+    double derivative_a;
+    double derivative_b;
+    void computeDerivative(const Function& f) {
+        derivative_a = f.derivative(nodes_.front());
+        derivative_b = f.derivative(nodes_.back());
     }
 };
-
 #endif // BSPLINE_H
