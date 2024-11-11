@@ -3,6 +3,7 @@
 #define BSPLINE_H
 
 #include "Function.h"
+#include "Thomas.h"
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
@@ -45,6 +46,31 @@ class Bbase : public Function {
     }
     double operator()(double x) const override {
         return evaluate(x);
+    }
+
+    double derivative(double x) const override {
+        if (nodes_.empty()) {
+            throw std::runtime_error("Spline has not initialed.");
+        }
+        if (x <= nodes_.front() || x >= nodes_.back()) {
+            return 0;
+        }
+        if (degree_ == 0) {
+            return 0;
+        } else {
+            std::vector<double> nodes1(nodes_.begin(), nodes_.end() - 1);
+            Bbase b1(nodes1);
+
+            std::vector<double> nodes2(nodes_.begin() + 1, nodes_.end());
+            Bbase b2(nodes2);
+
+            double result = 0;
+            result += b1.evaluate(x) / (nodes_[degree_] - nodes_.front());
+            result -= b2.evaluate(x) / (nodes_.back() - nodes_[1]);
+            result *= degree_;
+
+            return result;
+        }
     }
 
   private:
@@ -155,6 +181,30 @@ class LinearBSpline : public BSpline {
   protected:
     virtual void computeSpline() override {
         coefficients_ = values_;
+    }
+};
+
+class CubicBSpline : public BSpline {
+  public:
+    CubicBSpline(const std::vector<double>& nodes, const std::vector<double>& values)
+        : BSpline(nodes, values) {
+        degree_ = 3;
+        generatebasis();
+        computeSpline();
+    }
+
+    CubicBSpline(const Function& f, const std::vector<double>& nodes)
+        : BSpline(f, nodes) {
+        degree_ = 3;
+        generatebasis();
+        computeSpline();
+    }
+
+  protected:
+    virtual void computeSpline() override {
+        if (nodes_.size() != values_.size()) {
+            throw std::runtime_error("Number of nodes and values must be the same.");
+        }
     }
 };
 
