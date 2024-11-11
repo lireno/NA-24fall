@@ -100,7 +100,7 @@ class BSpline : public Function {
 
         double result = 0.0;
 
-        for (size_t i = 0; i < coefficients_.size() + degree_ - 1; ++i) {
+        for (size_t i = 0; i < coefficients_.size(); ++i) {
             result = result + basis_[i](x) * coefficients_[i];
         }
 
@@ -266,11 +266,17 @@ class CompleteCubicBSpline : public CubicBSpline {
         double xn = nodes_[n - 1];
         for (int i = 0; i < 3; ++i) {
             s[i] = basis_[i].derivative(x0);
-            t[i] = basis_[n - 1 + i](xn);
+            t[i] = basis_[n - 1 + i].derivative(xn);
         }
         s[3] = derivative_a;
         t[3] = derivative_b;
+        coefficients_.resize(n);
         solveUniqueTridialog(a, b, c, values_, coefficients_, s, t);
+
+        double a0 = (s[3] - s[1] * coefficients_[0] - s[2] * coefficients_[1]) / s[0];
+        double an = (t[3] - t[0] * coefficients_[n - 2] - t[1] * coefficients_[n - 1]) / t[2];
+        coefficients_.insert(coefficients_.begin(), a0);
+        coefficients_.push_back(an);
     };
 
   private:
