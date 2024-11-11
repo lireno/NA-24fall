@@ -236,7 +236,7 @@ class NaturalCubicPPSpline : public CubicPPSpline {
         std::vector<double> Ms(n - 2);
         std::vector<double> d(n - 2);
         for (size_t i = 1; i < n - 1; ++i) {
-            d[i - 1] = 3 * (Ks[i] - Ks[i - 1]) / (nodes_[i + 1] - nodes_[i - 1]);
+            d[i - 1] = 6 * (Ks[i] - Ks[i - 1]) / (nodes_[i + 1] - nodes_[i - 1]);
         }
         thomasAlgorithm(a, b, c, d, Ms);
         Ms.insert(Ms.begin(), 0);

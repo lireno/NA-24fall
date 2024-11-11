@@ -73,6 +73,31 @@ class Bbase : public Function {
         }
     }
 
+    double secondDerivative(double x) const {
+        if (nodes_.empty()) {
+            throw std::runtime_error("Spline has not initialed.");
+        }
+        if (x <= nodes_.front() || x >= nodes_.back()) {
+            return 0;
+        }
+        if (degree_ == 0) {
+            return 0;
+        } else {
+            std::vector<double> nodes1(nodes_.begin(), nodes_.end() - 1);
+            Bbase b1(nodes1);
+
+            std::vector<double> nodes2(nodes_.begin() + 1, nodes_.end());
+            Bbase b2(nodes2);
+
+            double result = 0;
+            result += b1.derivative(x) / (nodes_[degree_] - nodes_.front());
+            result -= b2.derivative(x) / (nodes_.back() - nodes_[1]);
+            result *= degree_;
+
+            return result;
+        }
+    }
+
   private:
     std::vector<double> nodes_;
     int degree_;
@@ -222,7 +247,12 @@ class CubicBSpline : public BSpline {
         d_star[n - 1] = d_star[n - 1] - m2 * t[3];
         a_star.erase(a_star.begin());
         c_star.pop_back();
+        x.resize(n);
         thomasAlgorithm(a_star, b_star, c_star, d_star, x);
+        double a0 = (s[3] - s[1] * x[0] - s[2] * x[1]) / s[0];
+        double an = (t[3] - t[0] * x[n - 2] - t[1] * x[n - 1]) / t[2];
+        x.insert(x.begin(), a0);
+        x.push_back(an);
     };
 
   private:
@@ -270,13 +300,7 @@ class CompleteCubicBSpline : public CubicBSpline {
         }
         s[3] = derivative_a;
         t[3] = derivative_b;
-        coefficients_.resize(n);
         solveUniqueTridialog(a, b, c, values_, coefficients_, s, t);
-
-        double a0 = (s[3] - s[1] * coefficients_[0] - s[2] * coefficients_[1]) / s[0];
-        double an = (t[3] - t[0] * coefficients_[n - 2] - t[1] * coefficients_[n - 1]) / t[2];
-        coefficients_.insert(coefficients_.begin(), a0);
-        coefficients_.push_back(an);
     };
 
   private:
@@ -286,5 +310,37 @@ class CompleteCubicBSpline : public CubicBSpline {
         derivative_a = f.derivative(nodes_.front());
         derivative_b = f.derivative(nodes_.back());
     }
+};
+
+class NaturalCubicBSpline : public CubicBSpline {
+  public:
+    NaturalCubicBSpline(const std::vector<double>& nodes, const std::vector<double>& values)
+        : CubicBSpline(nodes, values) {
+        computeSpline();
+    }
+
+    NaturalCubicBSpline(const Function& f, const std::vector<double>& nodes)
+        : CubicBSpline(f, nodes) {
+        computeSpline();
+    }
+
+  protected:
+    virtual void computeSpline() override {
+        if (values_.size() != n) {
+            throw std::runtime_error("Number of nodes and values must be the same.");
+        }
+        coefficients_.clear();
+        std::vector<double> s(4);
+        std::vector<double> t(4);
+        double x0 = nodes_[0];
+        double xn = nodes_[n - 1];
+        for (int i = 0; i < 3; ++i) {
+            s[i] = basis_[i].secondDerivative(x0);
+            t[i] = basis_[n - 1 + i].secondDerivative(xn);
+        }
+        s[3] = 0;
+        t[3] = 0;
+        solveUniqueTridialog(a, b, c, values_, coefficients_, s, t);
+    };
 };
 #endif // BSPLINE_H
