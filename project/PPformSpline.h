@@ -139,6 +139,21 @@ class CubicPPformSpline : public PPformSpline {
 
     // a: sub-diagonal, b: main diagonal, c: super-diagonal, d: right-hand side
     void thomasAlgorithm(const std::vector<double>& a, const std::vector<double>& b, const std::vector<double>& c, const std::vector<double>& d, std::vector<double>& x) {
+        if (std::abs(b[0]) < 1e-8) {
+            std::vector<double> d_star(d.begin() + 1, d.end());
+            double x2 = d[0] / c[0];
+            d_star[0] -= x2 * b[1];
+            d_star[1] -= x2 * a[1];
+            std::vector<double> a_star(a.begin() + 1, a.end());
+            a_star[0] = 0;
+            std::vector<double> b_star(b.begin() + 1, b.end());
+            b_star[0] = a[0];
+            std::vector<double> c_star(c.begin() + 1, c.end());
+            thomasAlgorithm(a_star, b_star, c_star, d_star, x);
+            x.insert(x.begin() + 1, x2);
+            x.pop_back();
+            return;
+        }
         int n = b.size();
         std::vector<double> c_prime(n - 1, 0.0);
         std::vector<double> d_prime(n, 0.0);
@@ -326,9 +341,12 @@ class PeriodicCubicPPformSPline : public CubicPPformSpline {
         d[n - 3] -= mus[n - 2] * temp;
         b[0] -= lambdas[1] * h2 / (h1 + h2);
         b[n - 3] -= mus[n - 2] * h1 / (h1 + h2);
-        double an = -lambdas[1] * h1 / (h1 + h2);
-        double cn = -mus[n - 2] * h2 / (h1 + h2);
+        double an = -lambdas[1] * 0.5 * h1 / (h1 + h2);
+        double cn = -mus[n - 2] * 0.5 * h2 / (h1 + h2);
         cyclicthomasAlgorithm(a, b, c, d, ms, an, cn);
+        double m1 = 2 * h1 / (h1 + h2) * ms[0];
+        ms.push_back(m1);
+        ms.insert(ms.begin(), m1);
         for (size_t i = 0; i < n - 1; ++i) {
             double c0 = values_[i];
             double c1 = ms[i];
