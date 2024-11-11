@@ -1,34 +1,26 @@
-// PPformSpline.h
-#ifndef PPFORMSPLINE_H
-#define PPFORMSPLINE_H
+// PPSpline.h
+#ifndef PPSPLINE_H
+#define PPSPLINE_H
 
+#include "Function.h"
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
 
-class Function {
+class PPSpline : public Function {
   public:
-    virtual double operator()(double x) const = 0;
-    virtual double derivative(double x) const {
-        double h = 1e-6;
-        return ((*this)(x + h) - (*this)(x - h)) / (2 * h);
-    }
-};
-
-class PPformSpline {
-  public:
-    PPformSpline(const std::vector<double>& nodes, const std::vector<double>& values)
+    PPSpline(const std::vector<double>& nodes, const std::vector<double>& values)
         : nodes_(nodes), values_(values) {}
 
-    PPformSpline(const Function& f, const std::vector<double>& nodes)
+    PPSpline(const Function& f, const std::vector<double>& nodes)
         : nodes_(nodes) {
         for (double x : nodes) {
             values_.push_back(f(x));
         }
     }
 
-    virtual ~PPformSpline() = default;
+    virtual ~PPSpline() = default;
 
     double evaluate(double x) const {
         if (nodes_.empty() || coefficients_.empty()) {
@@ -50,6 +42,10 @@ class PPformSpline {
 
         return result;
     }
+
+    double operator()(double x) const override {
+        return evaluate(x);
+    };
 
     void plotSpline(std::ostream& os = std::cout, size_t numSamplesPerInterval = 100) const {
         if (nodes_.empty() || coefficients_.empty()) {
@@ -77,6 +73,7 @@ class PPformSpline {
     virtual void computeSpline() = 0;
 
   private:
+    // Find the interval that x belongs to
     size_t findInterval(double x) const {
         for (size_t i = 0; i < nodes_.size() - 1; ++i) {
             if (x >= nodes_[i] && x <= nodes_[i + 1]) {
@@ -87,15 +84,15 @@ class PPformSpline {
     }
 };
 
-class LinearPPformSpline : public PPformSpline {
+class LinearPPSpline : public PPSpline {
   public:
-    LinearPPformSpline(const std::vector<double>& nodes, const std::vector<double>& values)
-        : PPformSpline(nodes, values) {
+    LinearPPSpline(const std::vector<double>& nodes, const std::vector<double>& values)
+        : PPSpline(nodes, values) {
         computeSpline();
     }
 
-    LinearPPformSpline(const Function& f, const std::vector<double>& nodes)
-        : PPformSpline(f, nodes) {
+    LinearPPSpline(const Function& f, const std::vector<double>& nodes)
+        : PPSpline(f, nodes) {
         computeSpline();
     }
 
@@ -120,15 +117,15 @@ class LinearPPformSpline : public PPformSpline {
     }
 };
 
-class CubicPPformSpline : public PPformSpline {
+class CubicPPSpline : public PPSpline {
   public:
-    CubicPPformSpline(const std::vector<double>& nodes, const std::vector<double>& values)
-        : PPformSpline(nodes, values) {
+    CubicPPSpline(const std::vector<double>& nodes, const std::vector<double>& values)
+        : PPSpline(nodes, values) {
         computePara();
     }
 
-    CubicPPformSpline(const Function& f, const std::vector<double>& nodes)
-        : PPformSpline(f, nodes) {
+    CubicPPSpline(const Function& f, const std::vector<double>& nodes)
+        : PPSpline(f, nodes) {
         computePara();
     }
 
@@ -139,6 +136,7 @@ class CubicPPformSpline : public PPformSpline {
 
     // a: sub-diagonal, b: main diagonal, c: super-diagonal, d: right-hand side
     void thomasAlgorithm(const std::vector<double>& a, const std::vector<double>& b, const std::vector<double>& c, const std::vector<double>& d, std::vector<double>& x) {
+        // cope with the case where b[0] is zero, which is needed in cyclicthomasAlgorithm
         if (std::abs(b[0]) < 1e-8) {
             std::vector<double> d_star(d.begin() + 1, d.end());
             double x2 = d[0] / c[0];
@@ -214,17 +212,17 @@ class CubicPPformSpline : public PPformSpline {
     }
 };
 
-class CompleteCubicPPformSPline : public CubicPPformSpline {
+class CompleteCubicPPSpline : public CubicPPSpline {
   public:
-    CompleteCubicPPformSPline(const std::vector<double>& nodes, const std::vector<double>& values, double da, double db)
-        : CubicPPformSpline(nodes, values) {
+    CompleteCubicPPSpline(const std::vector<double>& nodes, const std::vector<double>& values, double da, double db)
+        : CubicPPSpline(nodes, values) {
         derivative_a = da;
         derivative_b = db;
         computeSpline();
     }
 
-    CompleteCubicPPformSPline(const Function& f, const std::vector<double>& nodes)
-        : CubicPPformSpline(f, nodes) {
+    CompleteCubicPPSpline(const Function& f, const std::vector<double>& nodes)
+        : CubicPPSpline(f, nodes) {
         computeDerivative(f);
         computeSpline();
     }
@@ -272,15 +270,15 @@ class CompleteCubicPPformSPline : public CubicPPformSpline {
     }
 };
 
-class NaturalCubicPPformSPline : public CubicPPformSpline {
+class NaturalCubicPPSpline : public CubicPPSpline {
   public:
-    NaturalCubicPPformSPline(const std::vector<double>& nodes, const std::vector<double>& values)
-        : CubicPPformSpline(nodes, values) {
+    NaturalCubicPPSpline(const std::vector<double>& nodes, const std::vector<double>& values)
+        : CubicPPSpline(nodes, values) {
         computeSpline();
     }
 
-    NaturalCubicPPformSPline(const Function& f, const std::vector<double>& nodes)
-        : CubicPPformSpline(f, nodes) {
+    NaturalCubicPPSpline(const Function& f, const std::vector<double>& nodes)
+        : CubicPPSpline(f, nodes) {
         computeSpline();
     }
 
@@ -315,18 +313,18 @@ class NaturalCubicPPformSPline : public CubicPPformSpline {
     }
 };
 
-class PeriodicCubicPPformSPline : public CubicPPformSpline {
+class PeriodicCubicPPSpline : public CubicPPSpline {
   public:
-    PeriodicCubicPPformSPline(const std::vector<double>& nodes, const std::vector<double>& values)
-        : CubicPPformSpline(nodes, values) {
+    PeriodicCubicPPSpline(const std::vector<double>& nodes, const std::vector<double>& values)
+        : CubicPPSpline(nodes, values) {
         if (std::abs(values.front() - values.back()) > 1e-7) {
             throw std::runtime_error("The first and last values must be the same for a periodic spline.");
         }
         computeSpline();
     }
 
-    PeriodicCubicPPformSPline(const Function& f, const std::vector<double>& nodes)
-        : CubicPPformSpline(f, nodes) {
+    PeriodicCubicPPSpline(const Function& f, const std::vector<double>& nodes)
+        : CubicPPSpline(f, nodes) {
         computeSpline();
     }
 
@@ -370,4 +368,4 @@ class PeriodicCubicPPformSPline : public CubicPPformSpline {
         }
     }
 };
-#endif // PPFORMSPLINE_H
+#endif // PPSPLINE_H
