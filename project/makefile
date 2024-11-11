@@ -1,5 +1,7 @@
 test:
-	g++ -std=c++11 -o test test.cpp
-	./test
+	g++ -g -O0 -o test test.cpp
+	gdb test
+all: test
+
 clean:
 	rm -f test

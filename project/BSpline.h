@@ -8,6 +8,50 @@
 #include <stdexcept>
 #include <vector>
 
+class Bbase : public Function {
+  public:
+    Bbase(const std::vector<double>& nodes)
+        : nodes_(nodes) { degree_ = nodes_.size() - 2; }
+
+    double evaluate(double x) const {
+        if (nodes_.empty()) {
+            throw std::runtime_error("Spline has not initialed.");
+        }
+        if (x <= nodes_.front() || x >= nodes_.back()) {
+            return 0;
+        }
+        if (degree_ == 0) {
+            return 1;
+        }
+        if (degree_ == 1) {
+            if (x > nodes_[1]) {
+                return (nodes_[2] - x) / (nodes_[1] - nodes_[0]);
+            } else {
+                return (x - nodes_[0]) / (nodes_[2] - nodes_[1]);
+            }
+        } else {
+            std::vector<double> nodes1(nodes_.begin(), nodes_.end() - 1);
+            Bbase b1(nodes1);
+
+            std::vector<double> nodes2(nodes_.begin() + 1, nodes_.end());
+            Bbase b2(nodes2);
+
+            double result = 0;
+            result += (x - nodes_.front()) / (nodes_[degree_] - nodes_.front()) * b1.evaluate(x);
+            result += (nodes_.back() - x) / (nodes_.back() - nodes_[1]) * b2.evaluate(x);
+
+            return result;
+        }
+    }
+    double operator()(double x) const override {
+        return evaluate(x);
+    }
+
+  private:
+    std::vector<double> nodes_;
+    int degree_;
+};
+
 class BSpline : public Function {
   public:
     BSpline(const std::vector<double>& nodes, const std::vector<double>& values)
@@ -27,13 +71,9 @@ class BSpline : public Function {
             throw std::runtime_error("Spline has not initialed.");
         }
 
-        if (x < nodes_.front() || x > nodes_.back()) {
-            throw std::out_of_range("Input x is out of the spline range.");
-        }
-
         double result = 0.0;
 
-        for (size_t i = 0; i < coefficients_.size() - 1; ++i) {
+        for (size_t i = 0; i < coefficients_.size() + degree_ - 1; ++i) {
             result = result + basis_[i](x) * coefficients_[i];
         }
 
@@ -63,67 +103,59 @@ class BSpline : public Function {
 
   protected:
     std::vector<double> nodes_;
+    std::vector<double> extended_nodes_;
     std::vector<double> values_;
     std::vector<double> coefficients_;
     std::vector<Bbase> basis_;
+    int degree_;
     virtual void computeSpline() = 0;
+    void generatebasis() {
+        int n = nodes_.size();
+        int degree = degree_;
+
+        extended_nodes_.clear();
+        double leftExtension = nodes_[1] - nodes_[0];
+        double rightExtension = nodes_[n - 1] - nodes_[n - 2];
+
+        for (int i = 0; i < degree; ++i) {
+            extended_nodes_.push_back(nodes_[0] - (degree - i) * leftExtension);
+        }
+        for (double node : nodes_) {
+            extended_nodes_.push_back(node);
+        }
+        for (int i = 0; i < degree; ++i) {
+            extended_nodes_.push_back(nodes_[n - 1] + (i + 1) * rightExtension);
+        }
+        basis_.clear();
+        int numBasis = n + degree - 1;
+        for (int i = 0; i < numBasis; ++i) {
+            std::vector<double> basisNodes(extended_nodes_.begin() + i, extended_nodes_.begin() + i + degree + 2);
+            Bbase basisFunction(basisNodes);
+            basis_.push_back(basisFunction);
+        }
+    }
 };
 
-class Bbase : public Function {
+class LinearBSpline : public BSpline {
   public:
-    Bbase(const std::vector<double>& nodes, const std::vector<double>& values)
-        : nodes_(nodes), values_(values) { degree_ = nodes_.size() - 2; }
-
-    Bbase(const Function& f, const std::vector<double>& nodes)
-        : nodes_(nodes) {
-        for (double x : nodes) {
-            values_.push_back(f(x));
-        }
-        degree_ = nodes_.size() - 2;
+    LinearBSpline(const std::vector<double>& nodes, const std::vector<double>& values)
+        : BSpline(nodes, values) {
+        degree_ = 1;
+        generatebasis();
+        computeSpline();
     }
 
-    double evaluate(double x) const {
-        if (nodes_.empty()) {
-            throw std::runtime_error("Spline has not initialed.");
-        }
-        if (x < nodes_.front() || x > nodes_.back()) {
-            return 0;
-        }
-        if (degree_ == 0) {
-            return 1;
-        }
-        if (degree_ == 1) {
-            if (x > nodes_[1]) {
-                return (nodes_[1] - x) / (nodes_[1] - nodes_[0]);
-            } else {
-                return (x - nodes_[0]) / (nodes_[1] - nodes_[0]);
-            }
-        } else {
-            std::vector<double> nodes1(nodes_.begin(), nodes_.end() - 1);
-            std::vector<double> values1(values_.begin(), values_.end() - 1);
-            Bbase b1(nodes1, values1);
-
-            std::vector<double> nodes2(nodes_.begin() + 1, nodes_.end());
-            std::vector<double> values2(values_.begin() + 1, values_.end());
-            Bbase b2(nodes2, values2);
-
-            double result = 0;
-            result += (x - nodes_.front()) / (nodes_[degree_] - nodes_.front()) * b1.evaluate(x);
-            result += (nodes_.back() - x) / (nodes_.back() - nodes_[1]) * b2.evaluate(x);
-
-            return result;
-        }
+    LinearBSpline(const Function& f, const std::vector<double>& nodes)
+        : BSpline(f, nodes) {
+        degree_ = 1;
+        generatebasis();
+        computeSpline();
     }
 
-  public:
-    double operator()(double x) const override {
-        return evaluate(x);
+  protected:
+    virtual void computeSpline() override {
+        coefficients_ = values_;
     }
-
-  private:
-    std::vector<double> nodes_;
-    std::vector<double> values_;
-    int degree_;
 };
 
 #endif // BSPLINE_H
