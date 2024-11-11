@@ -261,13 +261,6 @@ class CompleteCubicPPformSPline : public CubicPPformSpline {
             double c3 = (ms[i + 1] + ms[i] - 2 * Ks[i]) / (h * h);
             coefficients_.push_back({c0, c1, c2, c3});
         }
-        for (const auto& coeff : coefficients_) {
-            std::cout << "系数: ";
-            for (double c : coeff) {
-                std::cout << c << " ";
-            }
-            std::cout << std::endl;
-        }
     }
 
   private:
@@ -281,14 +274,13 @@ class CompleteCubicPPformSPline : public CubicPPformSpline {
 
 class NaturalCubicPPformSPline : public CubicPPformSpline {
   public:
-    NaturalCubicPPformSPline(const std::vector<double>& nodes, const std::vector<double>& values, double derivative_a, double derivative_b)
+    NaturalCubicPPformSPline(const std::vector<double>& nodes, const std::vector<double>& values)
         : CubicPPformSpline(nodes, values) {
         computeSpline();
     }
 
     NaturalCubicPPformSPline(const Function& f, const std::vector<double>& nodes)
         : CubicPPformSpline(f, nodes) {
-
         computeSpline();
     }
 
@@ -299,6 +291,27 @@ class NaturalCubicPPformSPline : public CubicPPformSpline {
         }
 
         coefficients_.clear();
+
+        size_t n = nodes_.size();
+        std::vector<double> a(mus.begin() + 2, mus.begin() + n - 1);         // Sub-diagonal
+        std::vector<double> b(n - 2, 2.0);                                   // Main diagonal
+        std::vector<double> c(lambdas.begin() + 1, lambdas.begin() + n - 2); // Super-diagonal
+        std::vector<double> Ms(n - 2);
+        std::vector<double> d(n - 2);
+        for (size_t i = 1; i < n - 1; ++i) {
+            d[i - 1] = 3 * (Ks[i] - Ks[i - 1]) / (nodes_[i + 1] - nodes_[i - 1]);
+        }
+        thomasAlgorithm(a, b, c, d, Ms);
+        Ms.insert(Ms.begin(), 0);
+        Ms.push_back(0);
+        for (size_t i = 0; i < n - 1; ++i) {
+            double h = nodes_[i + 1] - nodes_[i];
+            double c0 = values_[i];
+            double c1 = Ks[i] - (Ms[i + 1] + 2 * Ms[i]) * h / 6;
+            double c2 = Ms[i] / 2;
+            double c3 = (Ms[i + 1] - Ms[i]) / (6 * h);
+            coefficients_.push_back({c0, c1, c2, c3});
+        }
     }
 };
 
