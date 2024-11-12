@@ -289,7 +289,7 @@ class PeriodicCubicPPSpline : public CubicPPSpline {
         std::vector<double> b(n - 1, 2.0); // Main diagonal
         std::vector<double> ms(n - 1);
 
-        cyclicthomasAlgorithm(mus, b, lambdas, d, ms);
+        cyclicthomasAlgorithm(lambdas, b, mus, d, ms);
         ms.push_back(ms.front());
 
         for (size_t i = 0; i < n - 1; ++i) {

@@ -7,6 +7,7 @@
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 class Bbase : public Function {
@@ -163,7 +164,7 @@ class BSpline : public Function {
     int n; // size of nodes_
 
     virtual void computeSpline() = 0;
-    virtual void generate_extended_points() {
+    void generate_extended_points() {
         int degree = degree_;
 
         extended_nodes_.clear();
@@ -181,8 +182,22 @@ class BSpline : public Function {
         }
     }
 
+    void generate_periodic_extended_points() {
+        extended_nodes_.clear();
+        int degree = degree_;
+
+        for (int i = 0; i < degree; ++i) {
+            extended_nodes_.push_back(nodes_.front() - (nodes_.back() - nodes_[n - degree + i - 1]));
+        }
+        for (double node : nodes_) {
+            extended_nodes_.push_back(node);
+        }
+        for (int i = 0; i < degree; ++i) {
+            extended_nodes_.push_back(nodes_.back() + (nodes_[i + 1] - nodes_.front()));
+        }
+    }
+
     void generate_basis() {
-        generate_extended_points();
         basis_.clear();
         int numBasis = n + degree_ - 1;
         for (int i = 0; i < numBasis; ++i) {
@@ -219,18 +234,26 @@ class LinearBSpline : public BSpline {
 
 class CubicBSpline : public BSpline {
   public:
-    CubicBSpline(const std::vector<double>& nodes, const std::vector<double>& values)
+    CubicBSpline(const std::vector<double>& nodes, const std::vector<double>& values, bool periodic = false)
         : BSpline(nodes, values) {
         degree_ = 3;
-        generate_extended_points();
+        if (periodic) {
+            generate_periodic_extended_points();
+        } else {
+            generate_extended_points();
+        }
         generate_basis();
         computeVal();
     }
 
-    CubicBSpline(const Function& f, const std::vector<double>& nodes)
+    CubicBSpline(const Function& f, const std::vector<double>& nodes, bool periodic = false)
         : BSpline(f, nodes) {
         degree_ = 3;
-        generate_extended_points();
+        if (periodic) {
+            generate_periodic_extended_points();
+        } else {
+            generate_extended_points();
+        }
         generate_basis();
         computeVal();
     }
@@ -355,7 +378,7 @@ class NaturalCubicBSpline : public CubicBSpline {
 class PeriodicCubicBSpline : public CubicBSpline {
   public:
     PeriodicCubicBSpline(const std::vector<double>& nodes, const std::vector<double>& values)
-        : CubicBSpline(nodes, values) {
+        : CubicBSpline(nodes, values, true) {
         if (std::abs(values.front() - values.back()) > 1e-7) {
             throw std::runtime_error("The first and last values must be the same for a periodic spline.");
         }
@@ -363,27 +386,11 @@ class PeriodicCubicBSpline : public CubicBSpline {
     }
 
     PeriodicCubicBSpline(const Function& f, const std::vector<double>& nodes)
-        : CubicBSpline(f, nodes) {
+        : CubicBSpline(f, nodes, true) {
         computeSpline();
     }
 
   protected:
-    void generate_extended_points() {
-        extended_nodes_.clear();
-        int degree = degree_;
-
-        // 在节点的开头和结尾添加适当数量的节点，确保周期性
-        for (int i = 0; i < degree; ++i) {
-            extended_nodes_.push_back(nodes_[nodes_.size() - degree + i] - (nodes_.back() - nodes_.front()));
-        }
-        for (double node : nodes_) {
-            extended_nodes_.push_back(node);
-        }
-        for (int i = 0; i < degree; ++i) {
-            extended_nodes_.push_back(nodes_[i] + (nodes_.back() - nodes_.front()));
-        }
-    }
-
     void computeSpline() override {
         if (values_.size() != n) {
             throw std::runtime_error("Number of nodes and values must be the same.");
