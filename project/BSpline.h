@@ -163,7 +163,7 @@ class BSpline : public Function {
     int n; // size of nodes_
 
     virtual void computeSpline() = 0;
-    void generatebasis() {
+    virtual void generate_extended_points() {
         int degree = degree_;
 
         extended_nodes_.clear();
@@ -179,10 +179,14 @@ class BSpline : public Function {
         for (int i = 0; i < degree; ++i) {
             extended_nodes_.push_back(nodes_[n - 1] + (i + 1) * rightExtension);
         }
+    }
+
+    void generate_basis() {
+        generate_extended_points();
         basis_.clear();
-        int numBasis = n + degree - 1;
+        int numBasis = n + degree_ - 1;
         for (int i = 0; i < numBasis; ++i) {
-            std::vector<double> basisNodes(extended_nodes_.begin() + i, extended_nodes_.begin() + i + degree + 2);
+            std::vector<double> basisNodes(extended_nodes_.begin() + i, extended_nodes_.begin() + i + degree_ + 2);
             Bbase basisFunction(basisNodes);
             basis_.push_back(basisFunction);
         }
@@ -194,14 +198,16 @@ class LinearBSpline : public BSpline {
     LinearBSpline(const std::vector<double>& nodes, const std::vector<double>& values)
         : BSpline(nodes, values) {
         degree_ = 1;
-        generatebasis();
+        generate_extended_points();
+        generate_basis();
         computeSpline();
     }
 
     LinearBSpline(const Function& f, const std::vector<double>& nodes)
         : BSpline(f, nodes) {
         degree_ = 1;
-        generatebasis();
+        generate_extended_points();
+        generate_basis();
         computeSpline();
     }
 
@@ -216,14 +222,16 @@ class CubicBSpline : public BSpline {
     CubicBSpline(const std::vector<double>& nodes, const std::vector<double>& values)
         : BSpline(nodes, values) {
         degree_ = 3;
-        generatebasis();
+        generate_extended_points();
+        generate_basis();
         computeVal();
     }
 
     CubicBSpline(const Function& f, const std::vector<double>& nodes)
         : BSpline(f, nodes) {
         degree_ = 3;
-        generatebasis();
+        generate_extended_points();
+        generate_basis();
         computeVal();
     }
 
@@ -360,7 +368,23 @@ class PeriodicCubicBSpline : public CubicBSpline {
     }
 
   protected:
-    virtual void computeSpline() override {
+    void generate_extended_points() {
+        extended_nodes_.clear();
+        int degree = degree_;
+
+        // 在节点的开头和结尾添加适当数量的节点，确保周期性
+        for (int i = 0; i < degree; ++i) {
+            extended_nodes_.push_back(nodes_[nodes_.size() - degree + i] - (nodes_.back() - nodes_.front()));
+        }
+        for (double node : nodes_) {
+            extended_nodes_.push_back(node);
+        }
+        for (int i = 0; i < degree; ++i) {
+            extended_nodes_.push_back(nodes_[i] + (nodes_.back() - nodes_.front()));
+        }
+    }
+
+    void computeSpline() override {
         if (values_.size() != n) {
             throw std::runtime_error("Number of nodes and values must be the same.");
         }
