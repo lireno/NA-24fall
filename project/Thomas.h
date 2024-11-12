@@ -44,21 +44,23 @@ void thomasAlgorithm(const std::vector<double>& a, const std::vector<double>& b,
     }
 }
 
-void cyclicthomasAlgorithm(const std::vector<double>& a, const std::vector<double>& b, const std::vector<double>& c, const std::vector<double>& d, std::vector<double>& x, const double an, const double cn) {
+void cyclicthomasAlgorithm(const std::vector<double>& a, const std::vector<double>& b, const std::vector<double>& c, const std::vector<double>& d, std::vector<double>& x) {
     int n = b.size();
     std::vector<double> u(n, 0.0);
     std::vector<double> v(n, 0.0);
     u[0] = b[0];
     v[0] = 1;
-    u[n - 1] = cn;
-    v[n - 1] = an / b[0];
+    u[n - 1] = c[n - 1];
+    v[n - 1] = a[0] / b[0];
     std::vector<double> b_star = b;
-    b_star[n - 1] -= an * cn / b_star[0];
+    b_star[n - 1] -= a[0] * c[n - 1] / b_star[0];
     b_star[0] = 0;
     std::vector<double> y(n, 0.0);
     std::vector<double> q(n, 0.0);
-    thomasAlgorithm(a, b_star, c, d, y);
-    thomasAlgorithm(a, b_star, c, u, q);
+    std::vector<double> a_star(a.begin() + 1, a.end());
+    std::vector<double> c_star(c.begin(), c.end() - 1);
+    thomasAlgorithm(a_star, b_star, c_star, d, y);
+    thomasAlgorithm(a_star, b_star, c_star, u, q);
     double z = (v[0] * y[0] + v[n - 1] * y[n - 1]) / (1 + q[0] * v[0] + q[n - 1] * v[n - 1]);
     for (int i = 0; i < n; ++i) {
         x[i] = y[i] - z * q[i];

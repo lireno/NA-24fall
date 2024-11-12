@@ -399,14 +399,9 @@ class PeriodicCubicBSpline : public CubicBSpline {
         b_star.pop_back();
         c_star.pop_back();
         d_star.pop_back();
-
-        double an = a_star.front();
-        a_star.erase(a_star.begin());
-        double cn = c_star.back();
-        c_star.pop_back();
         coefficients_.resize(n - 1);
 
-        cyclicthomasAlgorithm(a_star, b_star, c_star, d_star, coefficients_, an, cn);
+        cyclicthomasAlgorithm(a_star, b_star, c_star, d_star, coefficients_);
         coefficients_.insert(coefficients_.begin(), coefficients_.back());
         coefficients_.push_back(coefficients_[1]);
         coefficients_.push_back(coefficients_[2]);

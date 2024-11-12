@@ -12,13 +12,14 @@
 class PPSpline : public Function {
   public:
     PPSpline(const std::vector<double>& nodes, const std::vector<double>& values)
-        : nodes_(nodes), values_(values) {}
+        : nodes_(nodes), values_(values) { n = nodes_.size(); }
 
     PPSpline(const Function& f, const std::vector<double>& nodes)
         : nodes_(nodes) {
         for (double x : nodes) {
             values_.push_back(f(x));
         }
+        n = nodes_.size();
     }
 
     virtual ~PPSpline() = default;
@@ -53,7 +54,7 @@ class PPSpline : public Function {
             throw std::runtime_error("Spline not computed. Please call computeSpline() first.");
         }
 
-        for (size_t i = 0; i < nodes_.size() - 1; ++i) {
+        for (size_t i = 0; i < n - 1; ++i) {
             double xStart = nodes_[i];
             double xEnd = nodes_[i + 1];
             double step = (xEnd - xStart) / numSamplesPerInterval;
@@ -70,13 +71,14 @@ class PPSpline : public Function {
     std::vector<double> nodes_;
     std::vector<double> values_;
     std::vector<std::vector<double>> coefficients_;
+    int n; // size of nodes_
 
     virtual void computeSpline() = 0;
 
   private:
     // Find the interval that x belongs to
     size_t findInterval(double x) const {
-        for (size_t i = 0; i < nodes_.size() - 1; ++i) {
+        for (size_t i = 0; i < n - 1; ++i) {
             if (x >= nodes_[i] && x <= nodes_[i + 1]) {
                 return i;
             }
@@ -104,7 +106,7 @@ class LinearPPSpline : public PPSpline {
         }
 
         coefficients_.clear();
-        for (size_t i = 0; i < nodes_.size() - 1; ++i) {
+        for (size_t i = 0; i < n - 1; ++i) {
             double x1 = nodes_[i];
             double x2 = nodes_[i + 1];
             double y1 = values_[i];
@@ -138,13 +140,13 @@ class CubicPPSpline : public PPSpline {
     void computePara() {
         lambdas.push_back(0);
         mus.push_back(0); // make the index consistent with the textbook
-        for (size_t i = 1; i < nodes_.size() - 1; ++i) {
+        for (size_t i = 1; i < n - 1; ++i) {
             double lambda = (nodes_[i + 1] - nodes_[i]) / (nodes_[i + 1] - nodes_[i - 1]);
             double mu = 1 - lambda;
             lambdas.push_back(lambda);
             mus.push_back(mu);
         }
-        for (size_t i = 0; i < nodes_.size() - 1; ++i) {
+        for (size_t i = 0; i < n - 1; ++i) {
             double dividedDifference = (values_[i + 1] - values_[i]) / (nodes_[i + 1] - nodes_[i]);
             Ks.push_back(dividedDifference);
         }
@@ -174,7 +176,6 @@ class CompleteCubicPPSpline : public CubicPPSpline {
 
         coefficients_.clear();
 
-        size_t n = nodes_.size();
         std::vector<double> a(lambdas.begin() + 2, lambdas.begin() + n - 1); // Sub-diagonal
         std::vector<double> b(n - 2, 2.0);                                   // Main diagonal
         std::vector<double> c(mus.begin() + 1, mus.begin() + n - 2);         // Super-diagonal
@@ -229,7 +230,6 @@ class NaturalCubicPPSpline : public CubicPPSpline {
 
         coefficients_.clear();
 
-        size_t n = nodes_.size();
         std::vector<double> a(mus.begin() + 2, mus.begin() + n - 1);         // Sub-diagonal
         std::vector<double> b(n - 2, 2.0);                                   // Main diagonal
         std::vector<double> c(lambdas.begin() + 1, lambdas.begin() + n - 2); // Super-diagonal
@@ -275,28 +275,23 @@ class PeriodicCubicPPSpline : public CubicPPSpline {
 
         coefficients_.clear();
 
-        size_t n = nodes_.size();
-        std::vector<double> a(lambdas.begin() + 2, lambdas.begin() + n - 1); // Sub-diagonal
-        std::vector<double> b(n - 2, 2.0);                                   // Main diagonal
-        std::vector<double> c(mus.begin() + 1, mus.begin() + n - 2);         // Super-diagonal
-        std::vector<double> ms(n - 2);
-        std::vector<double> d(n - 2);
-        for (size_t i = 1; i < n - 1; ++i) {
-            d[i - 1] = 3 * (lambdas[i] * Ks[i - 1] + mus[i] * Ks[i]);
-        }
         double h1 = nodes_[1] - nodes_[0];
         double h2 = nodes_[n - 1] - nodes_[n - 2];
-        double temp = 1.5 * (Ks[0] * h2 + Ks[n - 2] * h1) / (h1 + h2);
-        d[0] -= lambdas[1] * temp;
-        d[n - 3] -= mus[n - 2] * temp;
-        b[0] -= lambdas[1] * h2 / (h1 + h2);
-        b[n - 3] -= mus[n - 2] * h1 / (h1 + h2);
-        double an = -lambdas[1] * 0.5 * h1 / (h1 + h2);
-        double cn = -mus[n - 2] * 0.5 * h2 / (h1 + h2);
-        cyclicthomasAlgorithm(a, b, c, d, ms, an, cn);
-        double m1 = 2 * h1 / (h1 + h2) * ms[0];
-        ms.push_back(m1);
-        ms.insert(ms.begin(), m1);
+        lambdas[0] = h1 / (h1 + h2);
+        mus[0] = h2 / (h1 + h2);
+
+        std::vector<double> d(n - 1);
+        d[0] = 3 * (lambdas[0] * Ks[n - 2] + mus[0] * Ks[0]);
+        for (size_t i = 1; i < n - 1; ++i) {
+            d[i] = 3 * (lambdas[i] * Ks[i - 1] + mus[i] * Ks[i]);
+        }
+
+        std::vector<double> b(n - 1, 2.0); // Main diagonal
+        std::vector<double> ms(n - 1);
+
+        cyclicthomasAlgorithm(mus, b, lambdas, d, ms);
+        ms.push_back(ms.front());
+
         for (size_t i = 0; i < n - 1; ++i) {
             double c0 = values_[i];
             double c1 = ms[i];
