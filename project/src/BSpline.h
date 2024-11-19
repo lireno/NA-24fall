@@ -106,6 +106,8 @@ class Bbase : public Function {
 
 class BSpline : public Function {
   public:
+    BSpline() = default;
+
     BSpline(const std::vector<double>& nodes, const std::vector<double>& values)
         : nodes_(nodes), values_(values) { n = nodes.size(); }
 
@@ -234,6 +236,7 @@ class LinearBSpline : public BSpline {
 
 class CubicBSpline : public BSpline {
   public:
+    CubicBSpline() = default;
     CubicBSpline(const std::vector<double>& nodes, const std::vector<double>& values, bool periodic = false)
         : BSpline(nodes, values) {
         degree_ = 3;
@@ -377,6 +380,8 @@ class NaturalCubicBSpline : public CubicBSpline {
 
 class PeriodicCubicBSpline : public CubicBSpline {
   public:
+    PeriodicCubicBSpline() = default;
+
     PeriodicCubicBSpline(const std::vector<double>& nodes, const std::vector<double>& values)
         : CubicBSpline(nodes, values, true) {
         if (std::abs(values.front() - values.back()) > 1e-7) {
