@@ -1,3 +1,5 @@
+// the file implements the Thomas algorithm for solving tridiagonal linear systems.
+
 #ifndef THOMAS_H
 #define THOMAS_H
 

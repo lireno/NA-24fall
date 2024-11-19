@@ -1,3 +1,16 @@
+// CurveFitting.h
+// This file defines classes for representing and fitting curves in 2D space.
+// Key components:
+// - Point: Represents a 2D point with x, y coordinates and provides a method to calculate its length.
+// - Curve: Abstract base class for parametric curves, supporting:
+//      - operator()(double t): Evaluates the curve at parameter t.
+//      - tangent(double t): Computes the tangent vector at t.
+//      - plot(): Outputs sampled points of the curve for visualization.
+// - CurveFitting: Fits a parametric curve using B-splines for smooth interpolation:
+//      - Constructors take a base curve and parameters for fitting.
+//      - operator()(double t): Evaluates the fitted curve at parameter t.
+//      - Automatically fits Natural or Periodic cubic B-splines for x and y coordinates.
+
 #ifndef CURVEFITTING_H
 #define CURVEFITTING_H
 

@@ -1,4 +1,20 @@
 // PPSpline.h
+// This file defines classes for constructing and evaluating piecewise polynomial splines,
+// including linear and cubic variations. The splines are used to interpolate a set of
+// nodes and values or a given function. The main classes are:
+
+// - PPSpline: Abstract base class for general piecewise polynomial splines.
+// - LinearPPSpline: Implements a linear interpolation spline.
+// - CubicPPSpline: Base class for cubic splines, with subclasses for:
+//      - CompleteCubicPPSpline: Specifies derivatives at boundaries.
+//      - NaturalCubicPPSpline: Sets the second derivatives at boundaries to zero.
+//      - PeriodicCubicPPSpline: Ensures periodicity in the spline, with equal values at the boundaries.
+
+// Key methods include:
+// - evaluate(double x): Computes the interpolated value at a given point.
+// - computeSpline(): Virtual method implemented by derived classes to compute spline coefficients.
+// - plot(): Generates a plot of the spline for visualization.
+
 #ifndef PPSPLINE_H
 #define PPSPLINE_H
 

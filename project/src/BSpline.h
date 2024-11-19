@@ -1,4 +1,23 @@
-// PPSpline.h
+// BSpline.h
+// This file defines classes for B-spline interpolation and evaluation, including support for linear, cubic, and advanced variations.
+// These classes can interpolate data points or a given function, using B-spline basis functions and coefficients. Key classes include:
+
+// - Bbase: Represents a single B-spline basis function for a given set of nodes.
+//      - Methods include evaluation, first derivative, and second derivative computation of the basis function.
+
+// - BSpline: Abstract base class for general B-spline interpolation.
+//      - Supports initialization with nodes and values or a Function object.
+//      - Key methods include evaluate() for computing spline values and plot() for visualization.
+
+// Derived classes:
+// - LinearBSpline: Implements linear B-spline interpolation.
+// - QuarticBSpline: Implements quartic B-spline interpolation with support for extended nodes and basis functions.
+// - CubicBSpline: Implements cubic B-spline interpolation with support for extended nodes and basis functions.
+//      - Variations include:
+//          - CompleteCubicBSpline: Specifies boundary derivatives for interpolation.
+//          - NaturalCubicBSpline: Ensures second derivatives are zero at the boundaries.
+//          - PeriodicCubicBSpline: Ensures periodic boundary conditions for seamless looping.
+
 #ifndef BSPLINE_H
 #define BSPLINE_H
 
@@ -153,7 +172,7 @@ class BSpline : public Function {
     int n; // size of nodes_
 
     virtual void computeSpline() = 0;
-    void generate_extended_points() {
+    virtual void generate_extended_points() {
         int degree = degree_;
 
         extended_nodes_.clear();
@@ -219,6 +238,54 @@ class LinearBSpline : public BSpline {
     virtual void computeSpline() override {
         coefficients_ = values_;
     }
+};
+
+class quarticBSpline : public BSpline {
+  public:
+    quarticBSpline(const Function& f, const int l, const int r)
+        : f(f), l(l), r(r) {
+        degree_ = 2;
+        n = r - l + 1;
+        for (int i = l; i <= r; ++i) {
+            nodes_.push_back(l + i);
+        }
+        generate_extended_points();
+        generate_basis();
+        computeSpline();
+    };
+
+    void generate_extended_points() override {
+        extended_nodes_.clear();
+        for (int i = l - 2; i <= r + 2; ++i) {
+            extended_nodes_.push_back(i);
+        }
+    }
+
+    void computeSpline() {
+        coefficients_.clear();
+        std::vector<double> a(n - 2, 1.0);
+        std::vector<double> b(n - 1, 6.0);
+        std::vector<double> c(n - 2, 1.0);
+        std::vector<double> d(n - 1, 0.0);
+        b.front() = 5.0;
+        b.back() = 5.0;
+        for (int i = 0; i < n - 1; ++i) {
+            d[i] = 8 * f(l + i + 1.0 / 2.0);
+        }
+        d[0] -= 2 * f(l);
+        d[n - 2] -= 2 * f(r);
+        coefficients_.resize(n - 1);
+        thomasAlgorithm(a, b, c, d, coefficients_);
+        double a0 = 2 * f(l) - coefficients_.front();
+        double an = 2 * f(r) - coefficients_.back();
+        coefficients_.insert(coefficients_.begin(), a0);
+        coefficients_.push_back(an);
+    }
+
+  private:
+    int l;
+    int r;
+    const Function& f;
 };
 
 class CubicBSpline : public BSpline {

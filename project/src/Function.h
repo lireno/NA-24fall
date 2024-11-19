@@ -1,3 +1,5 @@
+// the file defines a abstarct base class Function.
+
 #ifndef FUNCTION_H
 #define FUNCTION_H
 #include <cmath>
