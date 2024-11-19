@@ -14,12 +14,12 @@ def plot_spline(file_path, output_path):
     # Plot
     plt.figure(figsize=(8, 6))
     plt.plot(x, y, label="Spline Curve")
-    plt.scatter(x, y, color="red", s=10, label="Points")
     plt.title(f"Spline Curve: {os.path.basename(file_path)}")
     plt.xlabel("X")
     plt.ylabel("Y")
     plt.legend()
     plt.grid(True)
+    # plt.axis('equal')
     plt.savefig(output_path)
     plt.close()
     print(f"Saved plot to {output_path}")

@@ -1,45 +1,40 @@
 #include "BSpline.h"
+#include "CurveFitting.h"
 #include "PPSpline.h"
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 
-void saveSplineData(const BSpline& spline, const std::string& filename, size_t numSamplesPerInterval = 100) {
+template <typename T>
+void savePlottingData(const T& f, const std::string& filename, size_t numSample = 300) {
     std::ofstream outFile(filename);
     if (!outFile) {
         std::cerr << "Error: Could not open file " << filename << " for writing!" << std::endl;
         return;
     }
 
-    spline.plotSpline(outFile, numSamplesPerInterval);
+    f.plot(outFile, numSample);
     outFile.close();
     std::cout << "Saved spline points to " << filename << std::endl;
 }
 
-int main() {
-    // Define nodes and values for multiple splines
-    std::vector<std::vector<double>> nodes = {
-        {0, 1, 2, 3, 4, 5},
-        {0, 1, 2, 3, 4, 5},
-        {0, 1, 2, 3, 4, 5}};
-    std::vector<std::vector<double>> values = {
-        {0, 1, 4, 9, 16, 25},
-        {0, -1, -4, -9, -16, -25},
-        {0, 2, 8, 18, 32, 50}};
+class C1 : public Curve {
+  public:
+    C1() : Curve(0, 2 * Pi) {}
 
-    // Output directory for plot data
+    Point operator()(double t) const override {
+        return {std::cos(t), std::sin(t)};
+    }
+};
+
+int main() {
+
     std::string outputDir = "./plotting/data/";
 
-    // Create splines and save data
-    for (size_t i = 0; i < nodes.size(); ++i) {
-        // Create a natural cubic spline
-        NaturalCubicBSpline spline(nodes[i], values[i]);
-
-        // Save spline data to a file
-        std::string filename = outputDir + "spline_curve_" + std::to_string(i) + ".txt";
-        saveSplineData(spline, filename);
-    }
+    C1 c1;
+    CurveFitting cf(c1, 0.1);
+    savePlottingData(cf, outputDir + "curve_fitting.txt");
 
     return 0;
 }

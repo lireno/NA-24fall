@@ -49,22 +49,8 @@ class PPSpline : public Function {
         return evaluate(x);
     };
 
-    void plotSpline(std::ostream& os = std::cout, size_t numSamplesPerInterval = 100) const {
-        if (nodes_.empty() || coefficients_.empty()) {
-            throw std::runtime_error("Spline not computed. Please call computeSpline() first.");
-        }
-
-        for (size_t i = 0; i < n - 1; ++i) {
-            double xStart = nodes_[i];
-            double xEnd = nodes_[i + 1];
-            double step = (xEnd - xStart) / numSamplesPerInterval;
-
-            for (size_t j = 0; j <= numSamplesPerInterval; ++j) {
-                double x = xStart + j * step;
-                double y = evaluate(x);
-                os << x << " " << y << "\n";
-            }
-        }
+    void plot(std::ostream& os = std::cout, size_t numSample = 300) const {
+        Function::plot(os, nodes_.front(), nodes_.back(), numSample);
     }
 
   protected:

@@ -1,0 +1,184 @@
+\documentclass[a4paper]{article}
+\usepackage[affil-it]{authblk}
+
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{graphicx}
+
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+\newcommand{\esm}{\epsilon_M}
+\newcommand{\fl}{\text{fl}}
+\newcommand{\Eabs}{E_{\text{abs}}}
+\newcommand{\Erel}{E_{\text{rel}}}
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\normtwo}[1]{\left\|#1\right\|_2}
+\begin{document}
+% =================================================
+\title{Numerical Analysis homework \# 3}
+
+\author{梁育玮 Liang Yuwei 3230102923
+  \thanks{Electronic address: \texttt{liangyuwei631@gmail.com}}}
+\affil{(Mathematics and Applied Mathematics 2302), Zhejiang University }
+\date{\today}
+
+\maketitle
+
+
+% ============================================
+\section{Assignment}
+\subsection*{I. Convert 477 to binary.}
+we have $477 = 2^8 + 2^7 + 2^6 + 2^2 + 2^0 = (111011101)_2$. Thus in FPN, $477 = (1.11011101)_2 \times 2^8$.
+
+\subsection*{II. Convert $\frac{5}{3}$ to binary.}
+\begin{align*} 
+  \frac{5}{3} &= (1.1010\dots)_2 \\
+  &= (1.1010\dots )_2 \times 2^0
+\end{align*}
+
+\subsection*{III. Prove $x_R - x = \beta(x - x_L)$}
+denote $\alpha = \beta -1$, which is the biggest digit in the FPN. Then we have
+\[x_L = (\alpha.\alpha\alpha\ldots\alpha\alpha)_{\beta} \times \beta^{e-1},\quad x_R = (1.00\ldots 01)_{\beta} \times \beta^{e} .\]
+
+Thus we have
+\[x - x_L = \epsilon_M \beta^{e-1},\quad x_R - x = \epsilon_M \beta^{e}.\]
+
+Therefore, $x_R - x = \beta(x - x_L)$.
+
+\subsection*{IV. Two normalized FPNs adjacent to $x = \frac{5}{3}$}
+The two normalized FPNs adjacent to $x = \frac{5}{3}$ are $x_L = (1.1010\dots101)_2 \times 2^0$ and $x_R = (1.1010\dots110)_2 \times 2^0$. 
+Thus we have \begin{align*}
+  x - x_L &= \epsilon_M (\frac{1}{4} + \frac{1}{16} + \frac{1}{64} + \dots)\\
+&= \esm \frac{\frac{1}{4}}{1-\frac{1}{4}} = \frac{1}{3} \esm,\\
+  x_R - x_L &= \esm\\
+  \implies x_R - x &= \frac{2}{3} \esm.
+\end{align*}  
+Thus we have $x - x_L \le x_R -x$, which means $\fl(x) = x_L$.
+
+Moreover, we have 
+\[\Eabs(\fl(x)) = \frac{x- x_L}{x} = \frac{\esm}{5} = \frac{1}{5\times 2^{23}}\]
+
+\subsection*{V. Unit roundoff}
+Let $x$ be a float close to $1 + \esm$. As $x$ approaches $1 + \esm$ from the left, $fl(x) = 1$, and we have:
+\[\Erel(\fl(x)) = \frac{x-1}{x} = \frac{\esm}{1 + \esm} \approx \esm\]
+So the unit roundoff is $\esm$.
+
+\subsection*{VI. Substraction $1 - \cos x$ when $x = \frac{1}{4}$}
+We assume the opration is under the FPN system single precision.
+
+$\cos \frac{1}{4} = (1.111 1000 0000 1010 1010 0101)_2 \times 2^{-1}$
+\begin{align*}
+  1 - \cos \frac{1}{4} &= (1.000 0000 0000 0000 0000 0000)_2 \times 2^0 - (1.111 1000 0000 1010 1010 0101)_2 \times 2^{-1}\\
+&= (1.000 0000 0000 0000 0000 0000)_2 \times 2^0 - (0.1111 1000 0000 1010 1010 0101)_2 \times 2^{0}\\
+&=(1.110 0000 1010 1011 1111 1110) \times 2^{-7}.
+\end{align*}
+
+so 7 bits of precision are lost.
+
+\subsection*{VII. Avoid catastrophic cancellation}
+there are two ways to avoid catastrophic cancellation:
+\subsubsection*{Taylor series}
+\[  1 - \cos x = \frac{x^2}{2} - \frac{x^4}{4!} + \frac{x^6}{6!} + \dots\]
+
+\subsubsection*{Use trigonometric identity}
+\begin{align*}
+  1- \cos x &=  2\sin^2\frac{x}{2}\\
+&= 2\left(\frac{x}{2} - \frac{x^3}{48} + \frac{x^5}{3840} + \dots\right)^2
+\end{align*}
+
+\subsection*{VIII. condition number}
+\subsubsection*{(1) $f = (x-1)^\alpha$}
+The condition number is
+\[
+  C_f(x) = \abs{\frac{\alpha x}{x-1}}
+\]
+And when $x$ is close to 1, $C_f(x)$ is large.
+
+\subsubsection*{(2) $f = \ln x$}
+The condition number is
+\[
+  C_f(x) = \frac{1}{\abs{\ln x}}
+\]
+And when $x$ is close to 1, $C_f(x)$ is large.
+
+\subsubsection*{(3) $f = e^x$}
+The condition number is
+\[
+  C_f(x) = \abs{x}
+\]
+And when $x$ is large, $C_f(x)$ is large.
+
+\subsubsection*{(4) $f = \arccos {x}$}
+The condition number is
+\[
+  C_f(x) = \abs{\frac{x}{\arccos {x}\sqrt{1-x^2}}}
+\]
+And when $x$ is close to 1 or -1, $C_f(x)$ is large.
+
+\subsection*{IX. Consider the function $f(x) = 1-e^{-x}$ for $x\in [0,1]$}
+\subsubsection*{IX-a}
+The condition number is\[ 
+\text{cond}_f(x) = \abs{\frac{xe^{-x}}{1-e^{-x}}} = \frac{x}{e^{x} - 1}.
+\]
+
+Then, we need to show $x \leq e^x - 1$ for $x \in [0,1]$, which is trival. Thus we have $\text{cond}_f(x) \leq 1$.
+
+\subsubsection*{IX-b}
+Assume there exists $x_A$ such that \[
+1-e^{-x_A} = (1-e^{-x})(1+\delta).  \]
+
+Then we have \[
+\delta = \frac{e^{-x} - e^{-x_A}}{1-e^{-x}} = \frac{1 - e^{x-x_A}}{e^{x} - 1} \approx \frac{x_A - x}{e^x - 1}.\]
+
+Therefore, The condition number for algorithm $A$ is \begin{align*}
+  \text{cond}_A(x) &= \frac{1}{\epsilon_u}\abs{\frac{x_A-x}{x}}\\
+&= \frac{1}{\epsilon_u}\frac{\delta(e^x-1)}{x} \\&\leq \frac{e^x-1}{x}
+\end{align*}
+
+\subsubsection*{IX-c}
+The following is the figures of $\text{cond}_f(x)$ and $\text{cond}_A(x)$(Figure \ref{fig:1}). We can see that these when $x$ is close to 0, the condition numbers are close. But when $x$ is close to 1, the condition number of $f(x)$ is much smaller than that of $A$, since the condition number of $f(x)$ is decreasing while the condition number of $A$ is increasing. 
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.6\textwidth]{1.png}
+  \caption{The condition number of $f(x)$ and $A(x)$} 
+  \label{fig:1}
+\end{figure}
+
+\subsection*{X. Prove lemma 4.68}
+Assume the singular value of $A$ is \[0 \leq \sigma_1 \leq \sigma_2 \leq \dots \leq \sigma_n\]. Then we have 
+\[\sigma_1^2 x^T x \leq x^TA^TAx\leq \sigma_n^2 x^Tx,\]
+where the equality holds when $x$ is the eigenvector of $A^TA$ corresponding to $\sigma_1^2$ and $\sigma_n^2$.
+
+So we have
+\[
+ \normtwo{A} = \max_{\normtwo{x} = 1} \normtwo{Ax} = \max_{\normtwo{x} = 1} \sqrt{x^TA^TAx} = \sigma_n,
+ \]
+
+And the maxium singular value of $A^{-1}$ is $\sigma_1^{-1}$, so we have
+\[
+  \normtwo{A^{-1}} = \sigma_1^{-1}.
+\]
+
+Therefore, we have $\text{cond}_2(A) = \frac{\sigma_n}{\sigma_1} = \frac{\sigma_{\max}}{\sigma_{\min}}$. When $A$ is normal, the singular values of $A$ is its eigenvalues, so we have $\text{cond}_2(A) = \frac{\lambda_{\max}}{\lambda_{\min}}$. And when $A$ is unitary, the singular values of $A$ are all 1, so we have $\text{cond}_2(A) = 1$.
+\subsection*{XI. Wilkinson's polynomial}
+We can compute the component of componentwise condition number of $f$ is\[
+b_{j+1}(x) = \abs{\frac{a_j\frac{r^j}{\sum_{i =1}^{n}ia_ix^i-1}}{r}}=\abs{\frac{a_jr^j}{\sum_{i =1}^{n}ia_ir^i}}.
+\]  
+Thus The componentwise condition number of $f$ is \[
+\text{cond}_{f}(x) = \sum_{j=1}^{n}b_{j}(x) = \dfrac{\sum_{i = 0}^{n-1}\abs{a_i r^i}}{\abs{\sum_{i =1}^{n}ia_ir^i}}.
+\]
+
+When $f(x) = \prod_{k=1}^{p}(x-k)$, 
+
+\subsection*{XIII. bisection method}
+A single precision floating point number has 24 bits of precision, and to obtain absolute accuracy of $10^{-6}$, we need 20 significant digits for fraction, and only 4 left for integer part. Thus only when the absolute value of root is less than 16 can we obtain the absolute accuracy of $10^{-6}$.
+
+when the root is greater than 16, eg 128. We can not conpute the root with absolute accuracy less than $10^{-6}$.
+
+\subsection*{XIV. Fitting curves}
+\end{document}

@@ -39,19 +39,19 @@ $(DOC_DIR)/%.pdf: $(DOC_DIR)/%.tex
 	pdflatex -output-directory=$(DOC_DIR) $<
 
 # Compile and run tests
-test: $(TEST_OBJECTS)
+test: ./test/test.cpp $(HEADERS)
 	@echo "Compiling and running tests..."
-	$(CXX) $(CXXFLAGS) -I./src -o $(BIN_DIR)/test $(TEST_OBJECTS)
-	gdb $(BIN_DIR)/test
+	g++ -g -O0 -I./src -o t test/testcurve.cpp
+	gdb t
 
 $(BIN_DIR)/%.o: $(TEST_DIR)/%.cpp $(HEADERS)
 	@mkdir -p $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Generate plots
-plot: $(PLOT_DIR)/plot.cpp
+plot: $(PLOT_DIR)/plot.cpp  $(HEADERS)
 	@echo "Generating plots..."
-	$(CXX) $(CXXFLAGS) -I./src -o $(PLOT_DIR)/plot $(PLOT_DIR)/plot.cpp $(HEADERS)
+	$(CXX) $(CXXFLAGS) -I./src -o $(PLOT_DIR)/plot $(PLOT_DIR)/plot.cpp
 	$(PLOT_DIR)/plot
 	rm $(PLOT_DIR)/plot
 	python3 $(PLOT_DIR)/plot.py
