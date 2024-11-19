@@ -247,7 +247,7 @@ class quarticBSpline : public BSpline {
         degree_ = 2;
         n = r - l + 1;
         for (int i = l; i <= r; ++i) {
-            nodes_.push_back(l + i);
+            nodes_.push_back(i);
         }
         generate_extended_points();
         generate_basis();

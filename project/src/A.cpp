@@ -69,6 +69,6 @@ int main() {
         savePlottingData(spline, filename);
     }
 
-    savePlottingData(f, outputDir + "runge_function.txt", 1.0, -1.0);
+    savePlottingData(f, "runge_function.txt", 1.0, -1.0);
     return 0;
 }

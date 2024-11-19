@@ -17,10 +17,9 @@ class C1 : public Curve {
 
 int main() {
 
-    std::string outputDir = "./plotting/data/";
     C1 c1;
     CurveFitting cf(c1, 0.1);
-    savePlottingData(cf, outputDir + "curve_fitting.txt");
+    savePlottingData(cf, "curve_fitting.txt");
 
     return 0;
 }

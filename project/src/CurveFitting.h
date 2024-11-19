@@ -56,7 +56,7 @@ class Curve {
         }
         double step = (tEnd - tStart) / samples;
 
-        for (size_t i = 0; i <= samples; ++i) {
+        for (size_t i = 0; i < samples; ++i) {
             double t = tStart + i * step;
             Point p = (*this)(t);
             os << p.x << " " << p.y << std::endl;
@@ -89,6 +89,8 @@ class CurveFitting : public Curve {
         }
         // Ensure proper spline fitting
         fitSplines();
+        tStart = 0;
+        tEnd = cumulativeLengths_.back();
     }
 
     CurveFitting(const Curve& curve, double speed = 0.1, bool isEquallySpaced = true) : Curve(curve.tStart, curve.tEnd) {
