@@ -138,7 +138,16 @@ class BSpline : public Function {
         n = nodes.size();
     }
 
-    virtual ~BSpline() = default;
+    BSpline(const std::vector<double>& nodes, const std::vector<double>& coefficients, int degree)
+        : nodes_(nodes), coefficients_(coefficients), degree_(degree) {
+        n = nodes.size();
+        int N = coefficients.size();
+        if (N != n + degree - 1) {
+            throw std::runtime_error("Number of coefficients and nodes are not fit with degree.");
+        }
+        generate_extended_points();
+        generate_basis();
+    }
 
     double evaluate(double x) const {
         if (nodes_.empty() || coefficients_.empty()) {
@@ -171,8 +180,7 @@ class BSpline : public Function {
     int degree_;
     int n; // size of nodes_
 
-    virtual void computeSpline() = 0;
-    virtual void generate_extended_points() {
+    void generate_extended_points() {
         int degree = degree_;
 
         extended_nodes_.clear();
@@ -235,7 +243,7 @@ class LinearBSpline : public BSpline {
     }
 
   protected:
-    virtual void computeSpline() override {
+    void computeSpline() {
         coefficients_ = values_;
     }
 };
@@ -254,7 +262,7 @@ class quarticBSpline : public BSpline {
         computeSpline();
     };
 
-    void generate_extended_points() override {
+    void generate_extended_points() {
         extended_nodes_.clear();
         for (int i = l - 2; i <= r + 2; ++i) {
             extended_nodes_.push_back(i);
@@ -373,7 +381,7 @@ class CompleteCubicBSpline : public CubicBSpline {
     }
 
   protected:
-    virtual void computeSpline() override {
+    void computeSpline() {
         if (values_.size() != n) {
             throw std::runtime_error("Number of nodes and values must be the same.");
         }
@@ -413,7 +421,7 @@ class NaturalCubicBSpline : public CubicBSpline {
     }
 
   protected:
-    virtual void computeSpline() override {
+    void computeSpline() {
         if (values_.size() != n) {
             throw std::runtime_error("Number of nodes and values must be the same.");
         }
@@ -450,7 +458,7 @@ class PeriodicCubicBSpline : public CubicBSpline {
     }
 
   protected:
-    void computeSpline() override {
+    void computeSpline() {
         if (values_.size() != n) {
             throw std::runtime_error("Number of nodes and values must be the same.");
         }

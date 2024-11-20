@@ -127,6 +127,8 @@ class CurveFitting : public Curve {
         points_.push_back(point);
         cumulativeLengths_.push_back(cumulativeLength);
         fitSplines();
+        tStart = 0;
+        tEnd = cumulativeLengths_.back();
     }
 
     Point operator()(double t) const override {
@@ -136,6 +138,10 @@ class CurveFitting : public Curve {
         double x = splineX_->evaluate(t);
         double y = splineY_->evaluate(t);
         return Point(x, y);
+    }
+
+    int control_points_size() const {
+        return points_.size();
     }
 
   private:

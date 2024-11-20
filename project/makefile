@@ -24,9 +24,10 @@ PLOT_SOURCES = $(PLOT_DIR)/plot.cpp
 all: $(OBJECTS) report
 
 # Build assignment executables
-$(BIN_DIR)/%: assignment/%.cpp $(HEADERS)
+%: assignment/%.cpp $(HEADERS)
 	@mkdir -p $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $< -o $@
+	$(CXX) $(CXXFLAGS) $< -o $(BIN_DIR)/$@
+	./bin/$@
 
 $(BIN_DIR)/%: $(BIN_DIR)/%
 	$(CXX) $(CXXFLAGS) -o $@ $<
@@ -71,7 +72,6 @@ $(DOC_DIR)/%.pdf: $(DOC_DIR)/%.tex
 clean:
 	@echo "Cleaning up generated files..."
 	rm -rf $(BIN_DIR)/*
-	rm -f $(DOC_DIR)/*.pdf
-	rm -f $(DOC_DIR)/*.aux $(DOC_DIR)/*.log
+	rm -f $(DOC_DIR)/*.aux $(DOC_DIR)/*.log $(DOC_DIR)/*.pdf $(DOC_DIR)/*.run.xml $(DOC_DIR)/*.bcf $(DOC_DIR)/*.bib $(DOC_DIR)/*.bbl $(DOC_DIR)/*.gz
 	rm -f $(PLOT_DIR)/plot
 	rm -f $(PLOT_DIR)/data/*.txt $(PLOT_DIR)/figures/*.png

@@ -1,0 +1,477 @@
+\documentclass[a4paper]{article}
+\usepackage[affil-it]{authblk}
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+\begin{document}
+
+% =================================================
+\title{Design of the Curve Fitting Library}
+
+\author{Yuwei Liang 3230102923
+  \thanks{Electronic address: \texttt{liangyuwei631@gmail.com}}}
+\affil{(Mathematics and Applied Mathematics 2302), Zhejiang University}
+
+\date{\today}
+
+\maketitle
+
+\begin{abstract}
+The report presents the design and implement of polynomial-piecewise spline(PPSpline), BSpline and CurveFitting.
+\end{abstract}
+
+% ============================================
+
+\section{PPSpline}
+
+\subsection{Class Hierarchy}
+The \texttt{PPSpline} library uses an object-oriented structure. Below is the inheritance hierarchy:
+
+\begin{itemize}
+    \item \textbf{\texttt{PPSpline}} (Abstract Base Class)
+    \begin{itemize}
+        \item \textbf{\texttt{LinearPPSpline}} (Linear interpolation spline)
+        \item \textbf{\texttt{CubicPPSpline}} (Base class for cubic splines)
+        \begin{itemize}
+            \item \textbf{\texttt{CompleteCubicPPSpline}} (Specifies derivatives at boundaries)
+            \item \textbf{\texttt{NaturalCubicPPSpline}} (Zero second derivatives at boundaries)
+            \item \textbf{\texttt{PeriodicCubicPPSpline}} (Periodic boundary conditions)
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{ Class Overview and Functionality}
+\begin{itemize}
+    \item \texttt{PPSpline}: Abstract base class for general piecewise polynomial splines.
+    \begin{itemize}
+        \item \textbf{Purpose:} Provides a framework for spline interpolation.
+        \item \textbf{Key Methods:}
+            \begin{itemize}
+                \item \texttt{evaluate(double x)}: Computes the interpolated value at a given point.
+                \item \texttt{computeSpline()}: Pure virtual method for deriving spline coefficients.
+                \item \texttt{plot()}: Plots the spline within its defined range.
+            \end{itemize}
+    \end{itemize}
+    \item \texttt{LinearPPSpline}: Implements linear interpolation.
+    \begin{itemize}
+        \item \textbf{Purpose:} Creates a linear interpolation spline between nodes.
+        \item \textbf{Key Methods:}
+            \begin{itemize}
+                \item \texttt{computeSpline()}: Calculates linear coefficients \texttt{a} and \texttt{b} for each segment.
+            \end{itemize}
+    \end{itemize}
+    \item \texttt{CubicPPSpline}: Base class for cubic splines.
+    \begin{itemize}
+        \item \textbf{Purpose:} Provides a foundation for cubic spline calculations.
+        \item \textbf{Key Variables:}
+            \begin{itemize}
+                \item \texttt{lambdas, mus, Ks}: Arrays storing intermediate parameters for cubic spline calculation.
+            \end{itemize}
+        \item \textbf{Key Methods:}
+            \begin{itemize}
+                \item \texttt{computePara()}: Precomputes parameters like divided differences, lambdas, and mus.
+            \end{itemize}
+    \end{itemize}
+    \item \texttt{CompleteCubicPPSpline}: Specifies boundary derivatives for cubic splines.
+    \begin{itemize}
+        \item \textbf{Purpose:} Defines a cubic spline with boundary derivatives provided.
+        \item \textbf{Key Methods:}
+            \begin{itemize}
+                \item \texttt{computeSpline()}: Solves a tridiagonal system to determine cubic coefficients.
+            \end{itemize}
+    \end{itemize}
+    \item \texttt{NaturalCubicPPSpline}: Sets second derivatives to zero at boundaries.
+    \begin{itemize}
+        \item \textbf{Purpose:} Constructs a cubic spline with natural boundary conditions.
+        \item \textbf{Key Methods:}
+            \begin{itemize}
+                \item \texttt{computeSpline()}: Similar to \texttt{CompleteCubicPPSpline} but sets boundary second derivatives to zero.
+            \end{itemize}
+    \end{itemize}
+    \item \texttt{PeriodicCubicPPSpline}: Ensures periodicity in cubic splines.
+    \begin{itemize}
+        \item \textbf{Purpose:} Creates a spline with periodic boundary conditions.
+        \item \textbf{Key Methods:}
+            \begin{itemize}
+                \item \texttt{computeSpline()}: Solves a cyclic tridiagonal system for periodic cubic coefficients.
+            \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{Algorithm Details(cubic spline)}
+
+\subsubsection{Complete Cubic PPSpline}
+
+For a complete cubic spline, we aleady have $m_1 = f'(a)$ and $m_n = f'(b)$, where $a$ and $b$ are the boundaries. Then we can solve the following linear system to get the coefficients $m_i$ for each segment $[x_{i-1}, x_i]$.
+
+\[
+\begin{bmatrix}
+2 & \mu_2 &  &  &  &  \\
+\lambda_3 & 2 & \mu_3 &  &  &  \\
+ & \ddots & \ddots & \ddots &  &  \\
+ &  & \lambda_i & 2 & \mu_i &  \\
+ &  &  & \ddots & \ddots & \ddots \\
+ &  &  &  & \lambda_{N-1} & 2 & \mu_{N-2} \\
+ &  &  &  &  & \lambda_{N-2} & 2
+\end{bmatrix}
+\begin{bmatrix}
+m_2 \\
+m_3 \\
+\vdots \\
+m_i \\
+\vdots \\
+m_{N-2} \\
+m_{N-1}
+\end{bmatrix}
+=
+\mathbf{b}
+\]
+where $\lambda_i = \frac{h_{i-1}}{h_{i-1} + h_i}$, $\mu_i = 1 - \lambda_i$, $K_i = \frac{f(x_{i+1}) - f(x_i)}{h_i}$, $h_i = x_{i+1} - x_i$; and the elements of $\mathbf{b} = (b_2, b_3, \dots, b_{N-1})$ are
+\[b_2 =  3 \mu_2 K_2 + 3\lambda_2 K_1 -\lambda_2 m_1, \quad b_{N-1} = 3 \mu_{N-1} K_{N-1} + 3\lambda_{N-1} K_{N-2} - \mu_{N-1} m_n \]
+\[\forall i = 3, 4 ,\ldots, N-2, \quad 
+b_i = 3 \mu_i K_i + 3\lambda_i K_{i-1} \]
+\subsubsection{Natural Cubic PPSpline}
+
+For a natural cubic spline, we set $M_1 = M_n = 0$. Then we can solve the following linear system to get the coefficients $M_i$ for each segment $[x_{i-1}, x_i]$.
+
+\[
+\begin{bmatrix}
+2 & \lambda_2 &  &  &  &  \\
+\mu_3 & 2 & \lambda_3 &  &  &  \\
+ & \ddots & \ddots & \ddots &  &  \\
+ &  & \mu_i & 2 & \lambda_i &  \\
+ &  &  & \ddots & \ddots & \ddots \\
+ &  &  &  & \mu_{N-2} & 2 & \lambda_{N-2} \\
+ &  &  &  &  & \mu_{N-1} & 2
+\end{bmatrix}
+\begin{bmatrix}
+M_2 \\
+M_3 \\
+\vdots \\
+M_i \\
+\vdots \\
+M_{N-2} \\
+M_{N-1}
+\end{bmatrix}
+=
+\mathbf{b}
+\]
+where the elements of $\mathbf{b} = (b_2, b_3, \dots, b_{N-1})$ are
+\[b_i = 6 f[x_{i-1},x_i,x_{i+1}], \quad \forall i = 2,3,\ldots, N-1  \]
+\subsubsection{Periodic Cubic PPSpline}
+For periodic cubic spline, we can get the following linear system to get the coefficients $m_i$ for each segment $[x_{i-1}, x_i]$.
+
+\[
+\begin{bmatrix}
+2 & \mu_1 &  &  &  & \lambda_1 \\
+\lambda_2 & 2 & \mu_2 &  &  &  \\
+ & \ddots & \ddots & \ddots &  &  \\
+ &  & \lambda_{i-1} & 2 & \mu_i &  \\
+ &  &  & \ddots & \ddots & \lambda_{N-1} \\
+\mu_N &  &  &  & \lambda_N & 2
+\end{bmatrix}
+\begin{bmatrix}
+m_1 \\
+m_2 \\
+\vdots \\
+m_i \\
+\vdots \\
+m_N
+\end{bmatrix}
+=
+\mathbf{b},
+\]
+the off-diagonal elements of matrix are
+\[
+\mu_1 = \frac{t_{N+1} - t_N}{t_{N+1} - t_N + t_2 - t_1}, \quad
+\lambda_1 = \frac{t_2 - t_1}{t_{N+1} - t_N + t_2 - t_1},
+\]
+and the elements of $\mathbf{b}$ are $b_i = 3\mu_i K_i + 3\lambda_i K_{i-1}$ 
+
+\section{BSpline}
+
+\subsection{Class Hierarchy}
+
+\begin{itemize}
+    \item \textbf{\texttt{Function}} (Base Class for all functions)
+    \item \textbf{\texttt{Bbase}}: Represents a single B-spline basis function.
+    \item \textbf{\texttt{BSpline}}: Abstract base class for general B-spline interpolation.
+    \begin{itemize}
+        \item \textbf{\texttt{LinearBSpline}}: Implements linear B-spline interpolation.
+        \item \textbf{\texttt{QuarticBSpline}}: Implements quartic B-spline interpolation.
+        \item \textbf{\texttt{CubicBSpline}}: Implements cubic B-spline interpolation.
+        \begin{itemize}
+            \item \textbf{\texttt{CompleteCubicBSpline}}: Allows setting first derivatives at boundaries.
+            \item \textbf{\texttt{NaturalCubicBSpline}}: Ensures second derivatives are zero at boundaries.
+            \item \textbf{\texttt{PeriodicCubicBSpline}}: Ensures seamless periodic boundary conditions.
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{Summary of Functionality}
+
+\begin{itemize}
+    \item \textbf{\texttt{Bbase}}:
+    \begin{itemize}
+        \item Defines B-spline basis functions of arbitrary degree.
+        \item Supports evaluation, first derivative, and second derivative computations.
+    \end{itemize}
+    \item \textbf{\texttt{BSpline}}:
+    \begin{itemize}
+        \item Abstracts general B-spline interpolation and supports initialization with nodes and values.
+        \item Provides methods for visualization and evaluation.
+    \end{itemize}
+    \item \textbf{Derived Classes:}
+    \begin{itemize}
+        \item Implement specific spline variations by defining coefficients and boundary conditions.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Key Class Members and Functions}
+
+\subsubsection{\texttt{Bbase} Class}
+
+\textbf{Key Members:}
+\begin{itemize}
+    \item \texttt{std::vector<double> nodes\_}: The knots defining the basis function.
+    \item \texttt{int degree\_}: Degree of the basis function.
+\end{itemize}
+
+\textbf{Key Functions:}
+\begin{itemize}
+    \item \texttt{double evaluate(double x) const}:
+    Computes the value of the basis function at $x$.
+    \item \texttt{double derivative(double x) const}:
+    Computes the first derivative at $x$.
+    \item \texttt{double secondDerivative(double x) const}:
+    Computes the second derivative at $x$.
+\end{itemize}
+
+\subsubsection{\texttt{BSpline} Class}
+
+\textbf{Key Members:}
+\begin{itemize}
+    \item \texttt{std::vector<double> nodes\_}: Knots of the B-spline.
+    \item \texttt{std::vector<double> coefficients\_}: Coefficients of the B-spline.
+    \item \texttt{std::vector<Bbase> basis\_}: Precomputed basis functions.
+    \item \texttt{int degree\_}: Degree of the B-spline.
+    \item \texttt{int n}: Number of nodes.
+\end{itemize}
+
+\textbf{Key Functions:}
+\begin{itemize}
+    \item \texttt{BSpline(const std::vector<double>\& nodes, const std::vector<double>\& values)}:
+    Initializes the B-spline with nodes and values.
+    \item \texttt{double evaluate(double x) const}:
+    Computes the spline value at $x$ using:
+    \[
+    S(x) = \sum_{i} c_i B_i(x)
+    \]
+    \item \texttt{void generate\_extended\_points()}:
+    Creates extended nodes for proper basis function definition.
+    \item \texttt{void generate\_basis()}:
+    Precomputes basis functions for spline evaluation.
+\end{itemize}
+
+\subsubsection{Derived Classes}
+
+\textbf{LinearBSpline:}
+\begin{itemize}
+    \item Sets \texttt{degree\_ = 1}.
+    \item \texttt{void computeSpline()}:
+    Uses values directly as coefficients.
+\end{itemize}
+
+\textbf{QuarticBSpline:}
+\begin{itemize}
+    \item Sets \texttt{degree\_ = 2}.
+    \item \texttt{void computeSpline()}:
+    Computes quartic coefficients using a tridiagonal solver.
+\end{itemize}
+
+\textbf{CubicBSpline:}
+\begin{itemize}
+    \item Sets \texttt{degree\_ = 3}.
+    \item Variants handle different boundary conditions.
+\end{itemize}
+
+\subsection{Core Algorithm Processes}
+
+\subsubsection{B-Spline Basis Function Evaluation}
+
+The B-spline basis functions are computed recursively:
+
+\begin{itemize}
+    \item \textbf{Base Case:}
+    \[
+    B^0_i(x) = 
+    \begin{cases} 
+    1, & t_i \leq x < t_{i+1} \\
+    0, & \text{otherwise}
+    \end{cases}
+    \]
+    \item \textbf{Recursive Formula:}
+    \[
+    B^k_i(x) = \frac{x - t_i}{t_{i+k} - t_i} B^{k-1}_i(x) + \frac{t_{i+k+1} - x}{t_{i+k+1} - t_{i+1}} B^{k-1}_{i+1}(x)
+    \]
+\end{itemize}
+
+\subsubsection{Spline Coefficient Computation}
+For cubic B-splines, the function `solveUniqueTridiagonal` is used to solve a specific linear system \(Ax=d\) where
+
+\[
+A = 
+\begin{bmatrix}
+s_1 & s_2 & s_3 &  &  &  &  &  \\
+a_1 & b_1 & c_1 &  &  &  &  &  \\
+ & a_2 & b_2 & c_2 &  &  &  &  \\
+ &  & \ddots & \ddots & \ddots &  &  &  \\
+ &  &  & a_i & b_i & c_i &  &  \\
+ &  &  &  & \ddots & \ddots & \ddots &  \\
+ &  &  &  &  & a_{N-1} & b_{N-1} & c_{N-1} \\
+ &  &  &  &  &  & a_N & b_N & c_N \\
+ &  &  &  &  &  & t_1 & t_2 & t_3
+\end{bmatrix}
+\]
+The function will first transform the matrix into a traditional tridiagonal matrix and then solve it using the Thomas algorithm.
+
+For Complete Cubic BSpline and Natural Cubic BSpline, the matrix we will solve will be in this form:
+
+And for periodic cubic BSpline, the idea is Similar with periodic cubic PPSpline.
+
+\subsection{Visual Summary}
+
+\begin{tcolorbox}[colback=white!95!blue,colframe=blue!40!black,title=Algorithm Overview]
+Input: Nodes, Values, Degree \\
+$\downarrow$ \\
+Extend Nodes \\
+$\downarrow$ \\
+Generate Basis Functions \\
+$\downarrow$ \\
+Setup System of Equations \\
+$\downarrow$ \\
+Solve Coefficients\\
+$\downarrow$ \\
+Evaluate Spline: $S(x) = \sum c_i \cdot B_i(x)$
+\end{tcolorbox}
+
+\section{Curve Fitting}
+
+\subsection{Class Hierarchy}
+
+\begin{itemize}
+    \item \textbf{\texttt{Curve}} (Abstract Base Class):
+    \begin{itemize}
+        \item Provides an interface for parametric curves.
+        \item Supports curve evaluation, tangent computation, and visualization.
+    \end{itemize}
+    \item \textbf{\texttt{CurveFitting}}:
+    \begin{itemize}
+        \item Implements parametric curve fitting using cubic B-splines.
+        \item Automatically determines and fits either \texttt{NaturalCubicBSpline} or \texttt{PeriodicCubicBSpline} for both $x$ and $y$ coordinates.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Summary of Functionality}
+
+\begin{itemize}
+    \item \textbf{\texttt{Curve}}:
+    \begin{itemize}
+        \item Supports parametric evaluation and tangent computation.
+        \item Provides a method to output sampled points for visualization.
+    \end{itemize}
+    \item \textbf{\texttt{CurveFitting}}:
+    \begin{itemize}
+        \item Fits a smooth parametric curve to given data or another curve.
+        \item Automatically constructs natural or periodic cubic B-splines for interpolation.
+    \end{itemize}
+\end{itemize}
+
+
+\subsection{Key Class Members and Functions}
+
+\subsubsection{\texttt{Curve} Class}
+
+\textbf{Key Members:}
+\begin{itemize}
+    \item \texttt{double tStart, tEnd}: Start and end parameters of the curve.
+\end{itemize}
+
+\textbf{Key Functions:}
+\begin{itemize}
+    \item \texttt{virtual Point operator()(double t) const = 0}:
+    Pure virtual function to evaluate the curve at parameter $t$.
+    \item \texttt{Point tangent(double t) const}:
+    Computes the tangent vector at parameter $t$ using central differences:
+    \[
+    \text{tangent}(t) = \frac{P(t + h) - P(t - h)}{2h}.
+    \]
+    \item \texttt{void plot(std::ostream\& os, size\_t samples = 300) const}:
+    Outputs sampled points of the curve for visualization.
+\end{itemize}
+
+\subsubsection{\texttt{CurveFitting} Class}
+
+\textbf{Key Members:}
+\begin{itemize}
+    \item \texttt{std::vector<Point> points\_}: Stores points sampled from the curve.
+    \item \texttt{std::vector<double> cumulativeLengths\_}: Stores cumulative arc lengths for parameterization.
+    \item \texttt{std::unique\_ptr<CubicBSpline> splineX\_}: Spline for the $x$ coordinate.
+    \item \texttt{std::unique\_ptr<CubicBSpline> splineY\_}: Spline for the $y$ coordinate.
+\end{itemize}
+
+\textbf{Key Functions:}
+\begin{itemize}
+    \item \texttt{CurveFitting(const Curve\& curve, int numControl)}:
+    Fits a parametric curve with a specified number of control points.
+    \item \texttt{Point operator()(double t) const override}:
+    Evaluates the fitted curve at parameter $t$ using:
+    \[
+    x = \text{splineX\_}(t), \quad y = \text{splineY\_}(t).
+    \]
+    \item \texttt{int control\_points\_size() const}:
+    Returns the number of control points.
+\end{itemize}
+
+% ============================================
+
+\subsection{Core Algorithm Processes}
+
+\subsubsection{Curve Sampling and Parameterization}
+
+To fit a curve:
+\begin{enumerate}
+    \item Sample points along the curve at equal intervals (or based on speed).
+    \item Compute cumulative arc lengths to parameterize the curve.
+\end{enumerate}
+
+\subsubsection{Spline Fitting}
+
+\begin{enumerate}
+    \item Extract $x$ and $y$ coordinates from the sampled points.
+    \item Determine the boundary conditions for splines:
+    \begin{itemize}
+        \item Use \texttt{PeriodicCubicBSpline} if the first and last coordinates are close.
+        \item Use \texttt{NaturalCubicBSpline} otherwise.
+    \end{itemize}
+    \item Fit separate cubic splines for $x$ and $y$ coordinates.
+\end{enumerate}
+
+\subsubsection{Curve Evaluation}
+
+Evaluate the curve at parameter $t$ by computing:
+\[
+x = \text{splineX\_}(t), \quad y = \text{splineY\_}(t).
+\]
+
+
+\end{document}

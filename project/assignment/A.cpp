@@ -65,7 +65,7 @@ int main() {
                   << std::setw(20) << maxError << std::endl;
 
         // Save the spline points to a file
-        std::string filename = outputDir + "spline_" + std::to_string(N) + ".txt";
+        std::string filename = std::to_string(N) + ".txt";
         savePlottingData(spline, filename);
     }
 
