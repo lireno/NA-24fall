@@ -1,0 +1,166 @@
+## Project Overview
+
+This project involves implementing and testing various spline interpolation methods, such as B-splines and piecewise polynomial splines (PP-splines). It includes generating data, visualizing results, and creating reports with the findings. The repository is structured to facilitate modular development, testing, and visualization.
+
+---
+
+## Directory Structure
+
+### **Root Folders**
+
+- **`assignment/`**: Contains the main programs (`.cpp` files) for spline computations and other functionalities.
+- **`bin/`**: Contains compiled binaries generated from the Makefile.
+- **`doc/`**: Documentation and reports, including LaTeX files and figures.
+- **`plotting/`**: Scripts for generating and visualizing data, including Python and C++ files for plotting.
+- **`src/`**: Header files implementing the core logic for splines, curve fitting, and related utilities.
+- **`test/`**: Unit tests for verifying the correctness of the implementation.
+
+---
+
+## Dependencies
+
+### **Compiler**
+
+- `g++` with C++17 support.
+
+### **Python**
+
+- Python 3.6+ with the following libraries:
+  - `matplotlib` for plotting.
+  - `numpy` for data handling.
+
+### **LaTeX**
+
+- Required to compile the `.tex` files for the report.
+
+---
+
+## Build Instructions
+
+The project uses a **Makefile** for building and managing different targets.
+
+### **Makefile Targets**
+
+1. **Default Target** (`all`):  
+   Compiles and runs all programs in the `assignment` directory and generates the report.
+   ```bash
+   make
+   ```
+
+2. **Build Assignment Programs**:  
+   Compiles individual programs in `assignment/` into `bin/`.
+   ```bash
+   make <program_name>
+   ```
+   Example:
+   ```bash
+   make baseB
+   make A
+   ```
+
+3. **Run All Programs**:  
+   Executes all compiled programs in the `bin/` directory.
+   ```bash
+   make run
+   ```
+
+4. **Generate Data**:  
+   Compiles and runs `plot.cpp` in the `plotting/` directory to generate data.
+   ```bash
+   make data
+   ```
+
+5. **Generate Plots**:  
+   Creates plots using Python scripts.
+   - make every figure for each txt file in `plotting/data/`:
+     ```bash
+     make plot
+     ```
+   - make a combined figure for all txt files in `plotting/data/`:
+     ```bash
+     make plot1
+     ```
+
+6. **Generate Reports**:  
+   Compiles the LaTeX documents into PDF reports.
+   ```bash
+   make report
+   ```
+
+7. **Clean Up**:  
+   Removes all compiled files, binaries, and temporary files.
+   ```bash
+   make clean
+   ```
+
+---
+
+## File Overview
+
+### **Key Files**
+
+#### **Code**
+
+- **`assignment/`**:
+  - `A.cpp`, `baseB.cpp`, `C.cpp`, `D.cpp`, `E.cpp`, `same.cpp`: Individual programs implementing various spline methods and tests.
+
+- **`src/`**:
+  - `BSpline.h`: Header file for B-spline implementation.
+  - `PPSpline.h`: Header file for PP-spline implementation.
+  - `CurveFitting.h`: Utility for curve fitting functions.
+  - `Function.h`: Generic function base class.
+  - `Plot.h`: Helper functions for generating plots.
+  - `Thomas.h`: Implements the Thomas algorithm for solving tridiagonal matrices.
+
+- **`test/`**:
+  - `test.cpp`, `testcurve.cpp`: Unit test files for validating spline implementations.
+
+#### **Plotting**
+
+- **`plotting/plot.cpp`**: Generates raw data for plotting.
+- **`plotting/plot.py`**: Creates plots using Python.
+- **`plotting/plot_in_one_figure.py`**: Creates combined plots in a single figure.
+
+#### **Documentation**
+
+- **`doc/design.tex`**: Contains the LaTeX code for the design document.
+- **`doc/report.tex`**: Contains the LaTeX code for the project report.
+- **`doc/figures/`**: Stores generated figures for the report.
+
+---
+
+## Usage Instructions
+
+1. Clone the repository:
+   ```bash
+   git clone <repository_url>
+   cd <repository_name>
+   ```
+
+2. Build and run individual programs:
+   ```bash
+   make <program_name>
+   ```
+
+3. Generate all outputs and reports:
+   ```bash
+   make
+   ```
+
+4. Visualize plots:
+   ```bash
+   make plot
+   ```
+
+5. Clean up the workspace:
+   ```bash
+   make clean
+   ```
+
+---
+
+## Notes
+
+- Ensure all dependencies are installed before running the project.
+- The `bin/` directory will be created automatically to store compiled binaries.
+- Generated plots and reports will be saved in the `plotting/figures/` and `doc/` directories, respectively.
