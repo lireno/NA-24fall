@@ -56,6 +56,8 @@ report: $(DOC_DIR)/design.pdf $(DOC_DIR)/report.pdf
 $(DOC_DIR)/%.pdf: $(DOC_DIR)/%.tex
 	@echo "Generating $@..."
 	pdflatex -output-directory=$(DOC_DIR) $<
+	pdflatex -output-directory=$(DOC_DIR) $<
+	rm -f $(DOC_DIR)/*.aux $(DOC_DIR)/*.log $(DOC_DIR)/*.run.xml $(DOC_DIR)/*.bcf $(DOC_DIR)/*.bib $(DOC_DIR)/*.bbl $(DOC_DIR)/*.gz
 
 # Clean up generated files
 clean:
