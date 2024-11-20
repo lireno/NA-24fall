@@ -13,7 +13,6 @@ This project involves implementing and testing various spline interpolation meth
 - **`doc/`**: Documentation and reports, including LaTeX files and figures.
 - **`plotting/`**: Scripts for generating and visualizing data, including Python and C++ files for plotting.
 - **`src/`**: Header files implementing the core logic for splines, curve fitting, and related utilities.
-- **`test/`**: Unit tests for verifying the correctness of the implementation.
 
 ---
 
@@ -111,9 +110,6 @@ The project uses a **Makefile** for building and managing different targets.
   - `Function.h`: Generic function base class.
   - `Plot.h`: Helper functions for generating plots.
   - `Thomas.h`: Implements the Thomas algorithm for solving tridiagonal matrices.
-
-- **`test/`**:
-  - `test.cpp`, `testcurve.cpp`: Unit test files for validating spline implementations.
 
 #### **Plotting**
 
