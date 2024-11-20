@@ -44,9 +44,7 @@ int main() {
     std::string outputDir = "./plotting/data/";
     std::vector<int> N_values = {6, 11, 21, 41, 81};
 
-    std::cout << std::setw(10) << "N"
-              << std::setw(20) << "Max Error" << std::endl;
-
+    std::vector<double> maxErrors;
     for (int N : N_values) {
         // Generate nodes and compute function values
         std::vector<double> nodes = generateNodes(a, b, N);
@@ -60,13 +58,20 @@ int main() {
 
         // Compute maximum error at midpoints
         double maxError = computeMaxError(spline, nodes, f);
-
-        std::cout << std::setw(10) << N
-                  << std::setw(20) << maxError << std::endl;
+        maxErrors.push_back(maxError);
 
         // Save the spline points to a file
-        std::string filename = std::to_string(N) + ".txt";
+        std::string filename = "splines with N = " + std::to_string(N) + ".txt";
         savePlottingData(spline, filename);
+    }
+
+    std::cout << std::setw(10) << "N"
+              << std::setw(20) << "Max Error" << std::endl;
+
+    for (int i = 0; i <= 4; ++i) {
+
+        std::cout << std::setw(10) << N_values[i]
+                  << std::setw(20) << maxErrors[i] << std::endl;
     }
 
     savePlottingData(f, "runge_function.txt", 1.0, -1.0);

@@ -41,11 +41,11 @@ run: $(OBJECTS)
 		echo ""; \
 	done
 
-# Build and run tests
-test: $(TEST_SOURCES) $(HEADERS)
-	@echo "Compiling and running tests..."
-	$(CXX) $(CXXFLAGS) -o $(BIN_DIR)/tests $(TEST_SOURCES)
-	$(BIN_DIR)/tests
+# # Build and run tests for debugging purpose
+# test: $(TEST_SOURCES) $(HEADERS)
+# 	@echo "Compiling and running tests..."
+# 	$(CXX) $(CXXFLAGS) -o $(BIN_DIR)/tests $(TEST_SOURCES)
+# 	$(BIN_DIR)/tests
 
 # Generate data from plot.cpp
 data: $(PLOT_SOURCES)

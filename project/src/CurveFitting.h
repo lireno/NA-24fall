@@ -144,6 +144,17 @@ class CurveFitting : public Curve {
         return points_.size();
     }
 
+    // for debugging and checking
+    void print_interval_lengths() const {
+        for (size_t i = 1; i < cumulativeLengths_.size(); ++i) {
+            std::cout << cumulativeLengths_[i] - cumulativeLengths_[i - 1] << std::endl;
+        }
+    }
+
+    double length() const {
+        return tEnd;
+    }
+
   private:
     std::vector<Point> points_;             // Points along the curve
     std::vector<double> cumulativeLengths_; // Cumulative lengths for parameterization
