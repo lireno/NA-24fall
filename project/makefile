@@ -24,28 +24,17 @@ PLOT_SOURCES = $(PLOT_DIR)/plot.cpp
 all: $(OBJECTS) report
 
 # Build assignment executables
-%: assignment/%.cpp $(HEADERS)
+$(BIN_DIR)/%: assignment/%.cpp $(HEADERS)
 	@mkdir -p $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $< -o $(BIN_DIR)/$@
-	./bin/$@
-
-$(BIN_DIR)/%: $(BIN_DIR)/%
-	$(CXX) $(CXXFLAGS) -o $@ $<
+	$(CXX) $(CXXFLAGS) $< -o $@
 	@echo "Built $@"
 
 run: $(OBJECTS)
 	@for prog in $(OBJECTS); do \
-		exec_file=$(BIN_DIR)/$$(basename $$prog); \
-		echo "Running $$exec_file..."; \
-		$$exec_file; \
+		echo "Running $$prog..."; \
+		$$prog; \
 		echo ""; \
 	done
-
-# # Build and run tests for debugging purpose
-# test: $(TEST_SOURCES) $(HEADERS)
-# 	@echo "Compiling and running tests..."
-# 	$(CXX) $(CXXFLAGS) -o $(BIN_DIR)/tests $(TEST_SOURCES)
-# 	$(BIN_DIR)/tests
 
 # Generate data from plot.cpp
 data: $(PLOT_SOURCES)
