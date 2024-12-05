@@ -79,6 +79,10 @@ The project uses a **Makefile** for building and managing different targets.
      ```bash
      make plot1
      ```
+   - make a 3D plot for each txt file in `plotting/data/`:
+     ```bash
+       make plot3d
+     ```
 
 6. **Generate Reports**:  
    Compiles the LaTeX documents into PDF reports.
@@ -146,6 +150,10 @@ The project uses a **Makefile** for building and managing different targets.
 4. Visualize plots:
    ```bash
    make plot
+   ```
+   or
+   ```bash
+   make plot3d
    ```
 
 5. Clean up the workspace:
