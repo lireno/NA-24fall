@@ -177,6 +177,42 @@ The result of the curve fitting is shown in Figure \ref{fig:curve_fitting}. The 
 \end{figure}
 
 \newpage
+
+\subsection*{Sphere Curve Fitting}
+
+The result is shown below. We can see the algorithm sucessfully fits the curve to the sphere. The effect of the fitting is better as $N$ increases.
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[t]{0.45\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{figures/sphere/sphere_curve.png}
+      \caption*{The original curve}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.45\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{figures/sphere/sphere_curve_fitting_10.png}
+      \caption*{Sphere fitting 10}
+  \end{subfigure}
+
+  \vspace{0.5cm}
+
+  \begin{subfigure}[t]{0.45\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{figures/sphere/sphere_curve_fitting_50.png}
+      \caption*{Sphere fitting 50}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.45\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{figures/sphere/sphere_curve_fitting_100.png}
+      \caption*{Sphere fitting 100}
+  \end{subfigure}
+  \caption{Sphere curve fitting results}
+  \label{fig:sphere_fitting}
+\end{figure}
+
+\newpage
 \section*{Test: PPform and Bform Have the Same Result}
 
 In this section, we analyze and confirm that the PPform (piecewise polynomial) and Bform (B-spline) representations of cubic splines yield the same results when evaluated at identical points. The test involves three types of cubic splines: Natural, Periodic, and Complete. Two sets of nodes and values are used to validate the results.
@@ -292,5 +328,6 @@ $x$ & B-Spline Value \\
 \end{table}
 
 we can see that the B-spline values are computed correctly and are consistent with the expected resully. 
+
 
 \end{document}

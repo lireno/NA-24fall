@@ -473,5 +473,14 @@ Evaluate the curve at parameter $t$ by computing:
 x = \text{splineX\_}(t), \quad y = \text{splineY\_}(t).
 \]
 
+But unfortunately, the parameter $t$ changed to the arc length $s$.
+
+\subsection{Sphere Curve Fitting}
+Actually, I designed this class a half month later than I finish above report. So I'm too lazy to write a complete report. So, just easy.
+
+The core idea is to transform this problem to the one above. We can first select a north pole and rotate to ensure that the north pole isn't on the curve. Then we can map the points on the sphere to the plane using stereographic projection, perform curve fitting on the plane, and finally map the curve back to the sphere and rotate it back.
+
+
+
 
 \end{document}
