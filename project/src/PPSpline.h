@@ -80,12 +80,25 @@ class PPSpline : public Function {
   private:
     // Find the interval that x belongs to
     size_t findInterval(double x) const {
-        for (size_t i = 0; i < n - 1; ++i) {
-            if (x >= nodes_[i] && x <= nodes_[i + 1]) {
-                return i;
+        if (x < nodes_.front() || x > nodes_.back()) {
+            throw std::out_of_range("Input x is out of the spline range.");
+        }
+
+        size_t low = 0;
+        size_t high = n - 1;
+
+        while (low < high) {
+            size_t mid = low + (high - low) / 2;
+            if (x < nodes_[mid]) {
+                high = mid;
+            } else if (x > nodes_[mid + 1]) {
+                low = mid + 1;
+            } else {
+                return mid;
             }
         }
-        throw std::runtime_error("Interval not found for input x.");
+
+        return low;
     }
 };
 

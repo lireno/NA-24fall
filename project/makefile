@@ -24,10 +24,10 @@ PLOT_SOURCES = $(PLOT_DIR)/plot.cpp
 all: $(OBJECTS) report
 
 # Build assignment executables
-$(BIN_DIR)/%: assignment/%.cpp $(HEADERS)
+%: assignment/%.cpp $(HEADERS)
 	@mkdir -p $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $< -o $@
-	@echo "Built $@"
+	$(CXX) $(CXXFLAGS) $< -o bin/$@
+	./bin/$@
 
 run: $(OBJECTS)
 	@for prog in $(OBJECTS); do \
@@ -50,6 +50,9 @@ plot:
 plot1:
 	python3 $(PLOT_DIR)/plot_in_one_figure.py
 
+plot3d:
+	python3 $(PLOT_DIR)/plot3d.py
+
 # Build LaTeX reports
 report: $(DOC_DIR)/design.pdf $(DOC_DIR)/report.pdf
 
@@ -58,6 +61,10 @@ $(DOC_DIR)/%.pdf: $(DOC_DIR)/%.tex
 	pdflatex -output-directory=$(DOC_DIR) $<
 	pdflatex -output-directory=$(DOC_DIR) $<
 	rm -f $(DOC_DIR)/*.aux $(DOC_DIR)/*.log $(DOC_DIR)/*.run.xml $(DOC_DIR)/*.bcf $(DOC_DIR)/*.bib $(DOC_DIR)/*.bbl $(DOC_DIR)/*.gz
+
+test: 
+	g++ -g -Wall -Wextra -O0 -I./src -o bin/test test/test.cpp
+	gdb bin/test
 
 # Clean up generated files
 clean:

@@ -67,6 +67,7 @@ class Curve {
 // Curve fitting using B-splines for a parametric 2D curve
 class CurveFitting : public Curve {
   public:
+    CurveFitting() = default;
     // Constructor that takes a base curve and fitting parameters
     CurveFitting(const Curve& curve, int numControl = 100) : Curve(curve.tStart, curve.tEnd) {
         double speed = (curve.tEnd - curve.tStart) / numControl;
@@ -188,6 +189,190 @@ class CurveFitting : public Curve {
         } else {
             splineY_ = std::make_unique<NaturalCubicBSpline>(cumulativeLengths_, yValues);
         }
+    }
+};
+
+class Point3D {
+  public:
+    double x, y, z;
+    Point3D(double x = 0, double y = 0, double z = 0) : x(x), y(y), z(z) {}
+    double length() const {
+        return std::sqrt(x * x + y * y + z * z);
+    }
+};
+
+class SphereCurve {
+  public:
+    double tStart, tEnd;
+
+    SphereCurve(double start = 0, double end = 0) : tStart(start), tEnd(end) {}
+
+    virtual Point3D operator()(double t) const = 0;
+
+    Point3D tangent(double t) const {
+        double h = 1e-6;
+        Point3D p1 = (*this)(t - h);
+        Point3D p2 = (*this)(t + h);
+        return {(p2.x - p1.x) / (2 * h), (p2.y - p1.y) / (2 * h), (p2.z - p1.z) / (2 * h)};
+    }
+
+    void plot(std::ostream& os = std::cout, size_t samples = 300) const {
+        if (tEnd <= tStart || samples == 0) {
+            throw std::runtime_error("Invalid range or sample count for plotting.");
+        }
+        double step = (tEnd - tStart) / samples;
+
+        for (size_t i = 0; i < samples; ++i) {
+            double t = tStart + i * step;
+            Point3D p = (*this)(t);
+            os << p.x << " " << p.y << " " << p.z << std::endl;
+        }
+    }
+};
+
+class SphereCurvefit : public SphereCurve {
+  public:
+    SphereCurvefit(const SphereCurve& spCurve, Point3D northPole = {0, 0, 1}, int numControl = 100) : SphereCurve(spCurve.tStart, spCurve.tEnd) {
+        build_rotate_matrix(northPole);
+
+        double speed = (spCurve.tEnd - spCurve.tStart) / numControl;
+        for (double t = spCurve.tStart; t <= spCurve.tEnd; t += speed) {
+            Point3D point = spCurve(t);
+            points_.push_back(point);
+        }
+
+        fitSplines();
+    }
+
+    Point3D operator()(double t) const override {
+        if (t < tStart || t > tEnd) {
+            throw std::runtime_error("Parameter t out of bounds.");
+        }
+        Point point = {splineX_->evaluate(t), splineY_->evaluate(t)};
+        return inverse_rotate(mapping_to_sphere(point));
+    }
+
+  private:
+    std::vector<Point3D> points_;
+    std::vector<double> cumulativeLengths_;
+    std::unique_ptr<CubicBSpline> splineX_;
+    std::unique_ptr<CubicBSpline> splineY_;
+    std::vector<std::vector<double>> rotate_matrix_ = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+    std::vector<std::vector<double>> inverse_rotate_matrix_ = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+
+    void build_rotate_matrix(Point3D northPole) {
+        double x = northPole.x;
+        double y = northPole.y;
+        double z = northPole.z;
+        double length = northPole.length();
+
+        if (std::abs(length - 1) > 0.001) {
+            throw std::runtime_error("Invalid north pole.");
+        }
+
+        if (std::abs(x) < 1e-6 && std::abs(y) < 1e-6) {
+            if (z > 0) {
+                return;
+            } else {
+                rotate_matrix_ = {{-1, 0, 0}, {0, 1, 0}, {0, 0, -1}};
+                inverse_rotate_matrix_ = {{-1, 0, 0}, {0, 1, 0}, {0, 0, -1}};
+                return;
+            }
+        }
+
+        double cos_phi = z;
+        double sin_phi = std::sqrt(1 - cos_phi * cos_phi);
+        double cos_theta = x / sin_phi;
+        double sin_theta = y / sin_phi;
+
+        rotate_matrix_ = {
+            {cos_theta * cos_phi, sin_theta * cos_phi, -sin_phi},
+            {-sin_theta, cos_theta, 0},
+            {cos_theta * sin_phi, sin_theta * sin_phi, cos_phi},
+        };
+
+        inverse_rotate_matrix_ = {
+            {cos_theta * cos_phi, -sin_theta, cos_theta * sin_phi},
+            {sin_theta * cos_phi, cos_theta, sin_theta * sin_phi},
+            {-sin_phi, 0, cos_phi}};
+    }
+
+    Point3D rotate(Point3D point) {
+        double x = point.x;
+        double y = point.y;
+        double z = point.z;
+        return {rotate_matrix_[0][0] * x + rotate_matrix_[0][1] * y + rotate_matrix_[0][2] * z,
+                rotate_matrix_[1][0] * x + rotate_matrix_[1][1] * y + rotate_matrix_[1][2] * z,
+                rotate_matrix_[2][0] * x + rotate_matrix_[2][1] * y + rotate_matrix_[2][2] * z};
+    }
+
+    Point3D inverse_rotate(Point3D point) const {
+        double x = point.x;
+        double y = point.y;
+        double z = point.z;
+        return {inverse_rotate_matrix_[0][0] * x + inverse_rotate_matrix_[0][1] * y + inverse_rotate_matrix_[0][2] * z,
+                inverse_rotate_matrix_[1][0] * x + inverse_rotate_matrix_[1][1] * y + inverse_rotate_matrix_[1][2] * z,
+                inverse_rotate_matrix_[2][0] * x + inverse_rotate_matrix_[2][1] * y + inverse_rotate_matrix_[2][2] * z};
+    }
+
+    Point mapping_to_plain(Point3D point) const {
+        double x = point.x;
+        double y = point.y;
+        double z = point.z;
+        return {x / (1 - z), y / (1 - z)};
+    }
+
+    Point3D mapping_to_sphere(Point point) const {
+        double x = point.x;
+        double y = point.y;
+        double denominator = 1 + x * x + y * y;
+        return {2 * x / denominator, 2 * y / denominator, (-1 + x * x + y * y) / denominator};
+    }
+
+    void fitSplines() {
+        if (points_.size() < 2) {
+            throw std::runtime_error("Insufficient points for spline fitting.");
+        }
+
+        std::vector<Point> mapped_control_points;
+        for (const Point3D& point : points_) {
+            Point3D rotatedPoint = rotate(point);
+            Point mappedPoint = mapping_to_plain(rotatedPoint);
+            mapped_control_points.push_back(mappedPoint);
+        }
+
+        // Extract x and y values
+        std::vector<double> xValues, yValues;
+        double cumulativeLength = 0;
+        for (const Point& point : mapped_control_points) {
+            if (!points_.empty()) {
+                double dx = point.x - points_.back().x;
+                double dy = point.y - points_.back().y;
+                cumulativeLength += std::sqrt(dx * dx + dy * dy);
+            }
+            xValues.push_back(point.x);
+            yValues.push_back(point.y);
+            cumulativeLengths_.push_back(cumulativeLength);
+        }
+
+        // Determine whether to use PeriodicCubicBSpline or NaturalCubicSpline
+        bool xPeriodic = std::abs(xValues.front() - xValues.back()) < 1e-6;
+        bool yPeriodic = std::abs(yValues.front() - yValues.back()) < 1e-6;
+
+        if (xPeriodic) {
+            splineX_ = std::make_unique<PeriodicCubicBSpline>(cumulativeLengths_, xValues);
+        } else {
+            splineX_ = std::make_unique<NaturalCubicBSpline>(cumulativeLengths_, xValues);
+        }
+
+        if (yPeriodic) {
+            splineY_ = std::make_unique<PeriodicCubicBSpline>(cumulativeLengths_, yValues);
+        } else {
+            splineY_ = std::make_unique<NaturalCubicBSpline>(cumulativeLengths_, yValues);
+        }
+
+        tStart = 0;
+        tEnd = cumulativeLengths_.back();
     }
 };
 
