@@ -1,0 +1,143 @@
+\documentclass[a4paper]{article}
+\usepackage[affil-it]{authblk}
+
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{graphicx}
+
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+\newcommand{\esm}{\epsilon_M}
+\newcommand{\fl}{\text{fl}}
+\newcommand{\Eabs}{E_{\text{abs}}}
+\newcommand{\Erel}{E_{\text{rel}}}
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\normtwo}[1]{\left\|#1\right\|_2}
+\newcommand{\norminf}[1]{\left\|#1\right\|_{\infty}}
+\newcommand{\norm}[1]{\left\|#1\right\|}
+\newcommand{\innerProduct}[2]{\langle #1 , #2\rangle}
+
+\begin{document}
+% =================================================
+\title{Numerical Analysis homework \# 5}
+
+\author{梁育玮 Liang Yuwei 3230102923
+  \thanks{Electronic address: \texttt{liangyuwei631@gmail.com}}}
+\affil{(Mathematics and Applied Mathematics 2302), Zhejiang University }
+\date{\today}
+
+\maketitle
+
+
+% ============================================
+\subsection*{I. proof of Theorem 5.7}
+To show that $\mathcal{c}[a,b]$ is a inner-proudct space over \(\mathbf{C}\) with given inner product, we need to prove that 
+the given inner product satisfy the three principle
+\begin{itemize}
+    \item \textbf{Linearity}: \begin{align*}
+        \langle \alpha u_1 + \beta u_2,v \rangle& = \int_a^b \rho(t) \left(\alpha u_1(t) + \beta u_2(t) \right) \overline{v(t)}dt\\   
+        & = \alpha\int_{a}^{b} \rho(t) u_1(t)\overline{v(t)} dt + \beta \int_{a}^{b} \rho(t) u_2(t)\overline{v(t)} dt
+       \\ & = \alpha  \langle u_1, v  \rangle + \beta \langle u_2 , v \rangle
+    \end{align*}\item \textbf{Positivity}: \[
+        \innerProduct{u}{u} = \int_{a}^{b} \rho(t) u(t) \overline{u(t)} dt= \int_{a}^{b} \rho(t) \norm{u(t)}^2 dt
+                     \geq 0\]
+Equality holds if and only if \(u(t) \equiv 0\) in \([a,b]\) since \(u(t)\) is continous.
+    \item \textbf{Hermitian symmetry}:        \[ \innerProduct{v}{u} =\int_{a}^{b} \rho(t) v(t) \overline{u(t)} dt 
+    = \overline{\int_{a}^{b} \rho(t) u(t) \overline{v(t)} dt} = \overline{\innerProduct{u}{v}} \]
+\end{itemize}
+Moreover, \(\mathcal{C}[a,b]\) is a normed vector space under the norm induced by the inner product.
+
+\subsection*{II. Consider the Chebyshev polynomial of the first kind}
+\subsubsection*{II-a}
+when \( m \neq n \), we have 
+\begin{align*}
+    \int_{-1}^{1}\frac{\cos(n\arccos{x})\cos(m\arccos{x})}{\sqrt{1-x^2}}dx  &= -\int_{-1}^{1} \cos(n\arccos{x})\cos(m\arccos{x}) 
+    d(\arccos x) \\   & = \int_{0}^{\pi} \cos (mt) \cos(nt) dt \\& = 0
+\end{align*}
+the last eqaution is hold by the Fourier Series Theory.
+\subsection*{II-b}
+We have \(T_0(x) = 1\), \(T_1(x) = x\) and \(T_2(x) = 2x^2-1\). And we can compute that 
+\[\innerProduct{T_0}{T_0} =\int_{0}^{\pi} 1^2 dt = \pi  \]
+\[\innerProduct{T_1}{T_1} = \int_{0}^{\pi} \cos^2t =\frac{\pi}{2} \]
+\[\innerProduct{T_2}{T_2} = \int_{0}^{\pi} \cos^2(2t)dt = \frac{\pi}{2}\]
+so we can noralize them as \({S_0(x)} = \frac{1}{\sqrt{\pi}}\), \(S_1(x) = \sqrt{\frac{2}{\pi}}x\) and 
+\({S_2(x)} = \sqrt{\frac{2}{\pi}}(2x^2-1)\)
+
+\subsection*{III. Least-Square approximation of a continous function}
+\subsubsection*{III-a. Fourier Expansion}
+Choose a orthonormal base for quadratic polynomial under the weight function first, Let \({S_0(x)} = \frac{1}{\sqrt{\pi}}\), \(S_1(x) = \sqrt{\frac{2}{\pi}}x\) and 
+\({S_2(x)} = \sqrt{\frac{2}{\pi}}(2x^2-1)\)
+
+We have \begin{align*}
+    &\innerProduct{y}{S_0} =\int_{-1}^{1}\frac{1}{\sqrt{\pi}}dx = \frac{2}{\sqrt{\pi}},\\
+    &\innerProduct{y}{S_1} =\int_{-1}^{1}\sqrt{\frac{2}{\pi}}xdx = 0\\
+    &\innerProduct{y}{S_2} =\int_{-1}^{1}\sqrt{\frac{2}{\pi}}(2x^2-1)dx = -\frac{2}{3}\sqrt{\frac{2}{\pi}}
+\end{align*}
+so the approximation polynomial is \(\hat{y}_1(x) =\innerProduct{y}{S_0}S_0 + \innerProduct{y}{S_1}S_1 + \innerProduct{y}{S_2}S_2 = -\frac{8}{3\pi}
+x^2 + \frac{10}{3\pi}  \)
+
+\subsubsection*{III-b. normal eqaution}
+We first construct the Gram matrix
+\[
+G(1,x ,x^2) =
+\begin{bmatrix}
+    \innerProduct{1}{1} &\innerProduct{1}{x}&\innerProduct{1}{x^2}\\
+    \innerProduct{x}{1} &\innerProduct{x}{x}&\innerProduct{x}{x^2}\\
+    \innerProduct{x^2}{1} &\innerProduct{x^2}{x}&\innerProduct{x^2}{x^2}\\
+\end{bmatrix}=
+\begin{bmatrix}
+    \pi     &0      &\frac{\pi}{2}     \\
+    0       &\frac{\pi}{2}       &0    \\
+    \frac{\pi}{2}        &0      &\frac{3\pi}{8}     \\
+\end{bmatrix}.
+\]
+We then calculate the vector
+\[
+\mathbf{c} = \begin{bmatrix}
+    \innerProduct{y}{1} \\ \innerProduct{y}{x}\\ \innerProduct{y}{x^2}
+\end{bmatrix} = \begin{bmatrix}
+    2\\0\\\frac{2}{3}
+\end{bmatrix}
+\]
+then we have\[
+\begin{bmatrix}
+    a_0\\a_1\\a_2
+\end{bmatrix} = G^{-1}\mathbf{c} = \begin{bmatrix}
+    \frac{10}{3\pi} \\ 0 \\ -\frac{8}{3\pi}
+\end{bmatrix}
+\]
+so \(\hat{y}_2(x) = -\frac{8}{3\pi}
+x^2 + \frac{10}{3\pi},\) which is same with the result in (a).
+
+\subsection*{IV. Discrete Least Square Problem}
+\subsubsection*{IV-a}
+set \begin{align*}
+&u_1 = 1\\
+&u_2 = x - \frac{\innerProduct{u_1}{x}}{\innerProduct{u_1}{u_1}}\times 1 = x - \frac{13}{2}\\
+&u_3 = x^2 - \frac{\innerProduct{u_1}{x^2}}{\innerProduct{u_1}{u_1}}\times 1 - \frac{\innerProduct{u_2}{x^2}}{\innerProduct{u_2}{u_2}}\times u_2 = x^2 - 13(x-\frac{13}{2}) - \frac{325}{6}
+\end{align*}
+noralize them as \begin{align*}
+    &v_1 = 0.28868\\\
+&v_2 = 0.083624x - 0.54356\\
+&v_3 =0.027372 x^2 - 0.35584 x + 0.83030
+\end{align*}
+\subsubsection*{IV-b}
+set \(y\) as sales record
+\begin{align*}
+    &\innerProduct{y}{v_1} = 479.78 \\\
+&\innerProduct{y}{v_2} = 49.255\\
+&\innerProduct{y}{v_3} =330.33
+\end{align*}
+so \(\hat{\varphi}(x) = 479.78 v_1 + 49.255 v_2 + 330.33 v_3\), therefore, \(\hat{\varphi}(x) = 9.04x^2 -113.43x + 441.23\),which is 
+same with the result in Example 5.55.
+
+\subsubsection*{VI-c}
+The part (a) can be reused, we can use the same orthonormal polynomial, but the part (b) can not be reused, we must calculate parameter once omre.
+
+When cope with a large number of records table, we can compute orthonormal polynomial only once and use it permanently, which is more efficient than normal equation.   
+\end{document}
