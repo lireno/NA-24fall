@@ -29,5 +29,6 @@
 *.dylib
 test*
 
+bin
 *.ipynb
 # 忽略当前目录下所有没有扩展名的文件
