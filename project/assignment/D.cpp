@@ -40,7 +40,7 @@ int main() {
 
     // Create spline interpolants
     CompleteCubicBSpline s1(f, nodes); // Complete cubic B-spline
-    quarticBSpline s2(f, -5, 5);       // Quartic B-spline (assumed implementation)
+    quarticBSpline s2(f, -5, 5);       // Quartic B-spline
 
     // Define test sites
     std::vector<double> testSites = {-3.5, -3.0, -0.5, 0.0, 0.5, 3.0, 3.5};

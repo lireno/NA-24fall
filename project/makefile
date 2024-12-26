@@ -18,10 +18,10 @@ TEST_OBJECTS = $(patsubst $(TEST_DIR)/%.cpp, $(BIN_DIR)/%, $(TEST_SOURCES))
 PLOT_SOURCES = $(PLOT_DIR)/plot.cpp
 
 # Targets
-.PHONY: all run test report data plot plot1 clean
+.PHONY: all run test report data plot plot1 clean plot3d
 
 # Default target
-all: $(OBJECTS) report
+all: run report
 
 # Build assignment executables
 %: assignment/%.cpp $(HEADERS)
@@ -29,11 +29,16 @@ all: $(OBJECTS) report
 	$(CXX) $(CXXFLAGS) $< -o bin/$@
 	./bin/$@
 
+$(BIN_DIR)/%: assignment/%.cpp $(HEADERS)
+	@mkdir -p $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) $< -o $@
+	$@
+
 run: $(OBJECTS)
 	@for prog in $(OBJECTS); do \
 		echo "Running $$prog..."; \
 		$$prog; \
-		echo ""; \
+		echo "\n\n"; \
 	done
 
 # Generate data from plot.cpp
@@ -65,6 +70,9 @@ $(DOC_DIR)/%.pdf: $(DOC_DIR)/%.tex
 test: 
 	g++ -g -Wall -Wextra -O0 -I./src -o bin/test test/test.cpp
 	gdb bin/test
+
+cleandata:
+	rm -f $(PLOT_DIR)/data/*.txt $(PLOT_DIR)/figures/*.png
 
 # Clean up generated files
 clean:

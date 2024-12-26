@@ -37,7 +37,6 @@ std::vector<double> generateNodes(double a, double b, int N) {
     return nodes;
 }
 
-// Main function
 int main() {
     RungeFunction f;
     double a = -1.0, b = 1.0;
@@ -46,21 +45,17 @@ int main() {
 
     std::vector<double> maxErrors;
     for (int N : N_values) {
-        // Generate nodes and compute function values
         std::vector<double> nodes = generateNodes(a, b, N);
         std::vector<double> values;
         for (double x : nodes) {
             values.push_back(f(x));
         }
 
-        // Create a natural cubic spline
         NaturalCubicPPSpline spline(nodes, values);
 
-        // Compute maximum error at midpoints
         double maxError = computeMaxError(spline, nodes, f);
         maxErrors.push_back(maxError);
 
-        // Save the spline points to a file
         std::string filename = "splines with N = " + std::to_string(N) + ".txt";
         savePlottingData(spline, filename);
     }

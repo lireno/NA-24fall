@@ -96,6 +96,11 @@ The project uses a **Makefile** for building and managing different targets.
    make clean
    ```
 
+   Remove only the data for plotting and the figures in `plotting/figures/`:
+   ```bash
+   make cleandata
+   ```
+
 ---
 
 ## File Overview
